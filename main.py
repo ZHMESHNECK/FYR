@@ -3,9 +3,10 @@ import requests
 from selenium.webdriver.firefox.options import Options
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
 
 # парсинг rieltor.ua
-
 
 def call_data_rieltor():
 
@@ -25,21 +26,13 @@ def call_data_rieltor():
 
     url = 'https://rieltor.ua/{}/flats-rent/{}'.format(city, room)
 
-    data = []
+    data_rieltor = []
 
     response = requests.get(
         url=url,
         headers={'user-agent': f'{ua.random}'},
         params=params
     )
-
-    # записываем страницу в файл
-    # with open('text.html', 'w', encoding='utf-8') as file:
-    #     file.write(response.text)
-
-    # читаем страницу с файла
-    # with open('text.html', encoding='utf-8') as file:
-    #     response = file.read()
 
     soup = BeautifulSoup(response.text, 'lxml')
     mdiv = soup.find_all(class_='catalog-card')
@@ -66,7 +59,7 @@ def call_data_rieltor():
             area = 'No area'
 
         if addres not in dublicate:
-            data.append(
+            data_rieltor.append(
                 {
                     "Цена": price,
                     "Район": area,
@@ -75,15 +68,16 @@ def call_data_rieltor():
                 }
             )
             dublicate.append(addres)
-    return data
+    return data_rieltor
 
-    # with open('data.json', 'w', encoding='utf-8') as file:
-    #     json.dump(data, file, indent=4, ensure_ascii=False)
 
+# парсинг olx
 
 def call_data_olx():
 
+    ua = UserAgent()
     options = Options()
+    options.set_preference("general.useragent.override", f'{ua.random}')
     options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
     options.add_argument('--headless')
 
@@ -91,34 +85,63 @@ def call_data_olx():
 
     url = f'https://www.olx.ua/d/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/?currency=UAH&search%5Border%5D=filter_float_price:asc'
 
+    # Читаем страницу olx
     try:
         driver.get(url=url)
-
-        # with open("index2.html", 'w', encoding='utf-8') as file:
-        #     file.write(driver.page_source)
+        time.sleep(8)
+        ## проверка браузера на совместимость с сайтом
+        try:
+            da = driver.find_element(
+                By.CLASS_NAME, "c-container__title").text == 'Ми великі шанувальники вінтажних речей, але ваш браузер занадто старомодний'
+            if da:
+                return 'Old version'
+        except:
+            pass
     except Exception as _ex:
         print(_ex)
     finally:
+        # ищем объявления
+        soup = BeautifulSoup(driver.page_source, 'lxml')
+
+        # 8 объявлений без "рекламы"
+        items_divs = soup.find_all('div', class_='css-1sw7q4x')[3:11]
         driver.close()
         driver.quit()
 
-    response = requests.get(
-        url=url
-    )
-    
-    with open("index.html",'w',encoding='utf-8') as file:
-        file.write(response.text)
+    data_olx = []
+    for item in items_divs:
+        try:
+            price = item.find('p', class_='css-10b0gli er34gjf0').text
+        except:
+            price = 'No price'
+        try:
+            addres = item.find('div', class_="css-u2ayx9").find('h6').text
+        except:
+            addres = 'No address'
+        try:
+            link = item.find('a').get('href')
+        except:
+            link = 'no url'
+        try:
+            area = item.find('p', class_='css-veheph er34gjf0').text.split()
+        except:
+            area = 'No area'
 
-    pull_olx()
+        data_olx.append(
+            {
+                "Цена": price,
+                "Район": area[0],
+                "Название": addres,
+                "Ссылка": f'https://www.olx.ua{link}',
+            }
+        )
+    return data_olx
 
-def pull_olx():
-    pass
+
+# def main():
+#     call_data_rieltor()
+#     call_data_olx()
 
 
-def main():
-    # call_data_rieltor()
-    call_data_olx()
-
-
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
