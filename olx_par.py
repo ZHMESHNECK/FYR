@@ -1,9 +1,10 @@
 from fake_useragent import UserAgent
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from bs4 import BeautifulSoup
-import time
 
 
 def call_data_olx():
@@ -12,7 +13,7 @@ def call_data_olx():
     options = Options()
     options.set_preference("general.useragent.override", f'{ua.random}')
     options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
 
     driver = webdriver.Firefox(options=options)
 
@@ -21,21 +22,18 @@ def call_data_olx():
     # Читаем страницу olx
     try:
         driver.get(url=url)
-        time.sleep(8)
+
         # проверка браузера на совместимость с сайтом
         try:
-            da = driver.find_element(
-                By.CLASS_NAME, "c-container__title").text == 'Ми великі шанувальники вінтажних речей, але ваш браузер занадто старомодний'
-            if da:
-                return 'Old version'
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "c-wrapper-inside")))
+            return 'Old version'
         except:
             pass
+
     except Exception as _ex:
         print(_ex)
     finally:
-
-        with open('olx.html','w',encoding='utf-8') as file:
-            file.write(driver.page_source)
         # ищем объявления
         soup = BeautifulSoup(driver.page_source, 'lxml')
 

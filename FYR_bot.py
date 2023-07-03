@@ -27,29 +27,29 @@ async def start(message: types.Message):
 @dp.message_handler(Text(equals='🔎 Искать 🔍'))
 async def search(message: types.Message):
     
-    await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
+    # await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
 
-    ## запуск функции для RIELTOR
-    data_rieltor=call_data_rieltor()
+    # ## запуск функции для RIELTOR
+    # data_rieltor=call_data_rieltor()
 
-    if data_rieltor != 'error':
+    # if data_rieltor != 'error':
 
-        ## ответ с rieltor
-        for index, item in enumerate(data_rieltor):
-            card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
-            f'{hbold("Цена: ")}{item.get("Цена")}\n' \
-            f'{hbold("Район: ")}{item.get("Район")}'
+    #     ## ответ с rieltor
+    #     for index, item in enumerate(data_rieltor):
+    #         card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
+    #         f'{hbold("Цена: ")}{item.get("Цена")}\n' \
+    #         f'{hbold("Район: ")}{item.get("Район")}'
             
-            if index%10 == 0:
-                time.sleep(3)
+    #         if index%10 == 0:
+    #             time.sleep(3)
 
-            await message.answer(card)
-        time.sleep(2)
-    else:
-        await message.answer('Не удалось соединиться с rieltor.ua')
+    #         await message.answer(card)
+    #     time.sleep(2)
+    # else:
+    #     await message.answer('Не удалось соединиться с rieltor.ua')
 
 
-    await message.answer('Начинаю поиск на 📦 OLX 📦')
+    # await message.answer('Начинаю поиск на 📦 OLX 📦')
 
     # ## запуск функции для OLX
     data_olx=call_data_olx()
@@ -80,22 +80,22 @@ async def search(message: types.Message):
     await message.answer('Начинаю поиск на 🏠 country 🏠')
 
     ## запуск функции для country
-    data_country=call_data_country()
+    # data_country=call_data_country()
 
-    if data_country != 'error':
+    # if data_country != 'error':
 
-        ## ответ с country
-        for index, item in enumerate(data_country):
-            card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
-            f'{hbold("Цена: ")}{item.get("Цена")}\n'
+    #     ## ответ с country
+    #     for index, item in enumerate(data_country):
+    #         card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
+    #         f'{hbold("Цена: ")}{item.get("Цена")}\n'
             
-            if index%10 == 0:
-                time.sleep(3)
+    #         if index%10 == 0:
+    #             time.sleep(3)
 
-            await message.answer(card)
-        time.sleep(2)
-    else:
-        await message.answer('Не удалось соединиться с country.ua')
+    #         await message.answer(card)
+    #     time.sleep(2)
+    # else:
+    #     await message.answer('Не удалось соединиться с country.ua')
 
 
 def main():
