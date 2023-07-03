@@ -1,10 +1,14 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
-from main import call_data_rieltor,call_data_olx
+from olx_par import call_data_olx
+from rieltor_par import call_data_rieltor
+from country_par import call_data_country
 from aiogram.utils.markdown import hbold, hlink
 import environ
-import json
 import time
+
+
+
 env = environ.Env()
 env.read_env('.env')
 
@@ -23,26 +27,31 @@ async def start(message: types.Message):
 @dp.message_handler(Text(equals='🔎 Искать 🔍'))
 async def search(message: types.Message):
     
-    ## запуск функции для RIELTOR
     await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
+
+    ## запуск функции для RIELTOR
     data_rieltor=call_data_rieltor()
 
-    ## ответ с rieltor
-    for index, item in enumerate(data_rieltor):
-        card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
-        f'{hbold("Цена: ")}{item.get("Цена")}\n' \
-        f'{hbold("Район: ")}{item.get("Район")}'
-        
-        if index%10 == 0:
-            time.sleep(3)
+    if data_rieltor != 'error':
 
-        await message.answer(card)
-    time.sleep(2)
+        ## ответ с rieltor
+        for index, item in enumerate(data_rieltor):
+            card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
+            f'{hbold("Цена: ")}{item.get("Цена")}\n' \
+            f'{hbold("Район: ")}{item.get("Район")}'
+            
+            if index%10 == 0:
+                time.sleep(3)
+
+            await message.answer(card)
+        time.sleep(2)
+    else:
+        await message.answer('Не удалось соединиться с rieltor.ua')
 
 
-    ## запуск функции для OLX
     await message.answer('Начинаю поиск на 📦 OLX 📦')
 
+    # ## запуск функции для OLX
     data_olx=call_data_olx()
 
     if data_olx == 'Old version':
@@ -66,6 +75,27 @@ async def search(message: types.Message):
             await message.answer(card)
     else:
         await message.answer('Не удалось соединиться с OLX')
+
+    
+    await message.answer('Начинаю поиск на 🏠 country 🏠')
+
+    ## запуск функции для country
+    data_country=call_data_country()
+
+    if data_country != 'error':
+
+        ## ответ с country
+        for index, item in enumerate(data_country):
+            card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
+            f'{hbold("Цена: ")}{item.get("Цена")}\n'
+            
+            if index%10 == 0:
+                time.sleep(3)
+
+            await message.answer(card)
+        time.sleep(2)
+    else:
+        await message.answer('Не удалось соединиться с country.ua')
 
 
 def main():

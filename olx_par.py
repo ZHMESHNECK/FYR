@@ -1,77 +1,10 @@
 from fake_useragent import UserAgent
-import requests
 from selenium.webdriver.firefox.options import Options
-from bs4 import BeautifulSoup
-from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium import webdriver
+from bs4 import BeautifulSoup
 import time
 
-# парсинг rieltor.ua
-
-def call_data_rieltor():
-
-    ua = UserAgent()
-    city = 'kiev'
-    price_min = ''
-    price_max = ''
-    sort = "byprice"
-
-    room = ''
-
-    params = {
-        "price_min": price_min,
-        "price_max": price_max,
-        "sort": sort
-    }
-
-    url = 'https://rieltor.ua/{}/flats-rent/{}'.format(city, room)
-
-    data_rieltor = []
-
-    response = requests.get(
-        url=url,
-        headers={'user-agent': f'{ua.random}'},
-        params=params
-    )
-
-    soup = BeautifulSoup(response.text, 'lxml')
-    mdiv = soup.find_all(class_='catalog-card')
-    dublicate = []
-
-    # 8 объявлений
-    for div in mdiv[:8]:
-        try:
-            price = div.find('div', class_='catalog-card-price').text.strip()
-        except:
-            price = 'No price'
-        try:
-            addres = div.find('div', class_="catalog-card-address").text
-        except:
-            addres = 'No address'
-        try:
-            link = div.find('a', class_='catalog-card-media').get('href')
-        except:
-            link = 'No link'
-        try:
-            area = div.find(
-                'div', class_='catalog-card-region').find_all('a')[1].text.strip()
-        except:
-            area = 'No area'
-
-        if addres not in dublicate:
-            data_rieltor.append(
-                {
-                    "Цена": price,
-                    "Район": area,
-                    "Адрес": addres,
-                    "Ссылка": link,
-                }
-            )
-            dublicate.append(addres)
-    return data_rieltor
-
-
-# парсинг olx
 
 def call_data_olx():
 
@@ -79,7 +12,7 @@ def call_data_olx():
     options = Options()
     options.set_preference("general.useragent.override", f'{ua.random}')
     options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
-    options.add_argument('--headless')
+    # options.add_argument('--headless')
 
     driver = webdriver.Firefox(options=options)
 
@@ -89,7 +22,7 @@ def call_data_olx():
     try:
         driver.get(url=url)
         time.sleep(8)
-        ## проверка браузера на совместимость с сайтом
+        # проверка браузера на совместимость с сайтом
         try:
             da = driver.find_element(
                 By.CLASS_NAME, "c-container__title").text == 'Ми великі шанувальники вінтажних речей, але ваш браузер занадто старомодний'
@@ -100,6 +33,9 @@ def call_data_olx():
     except Exception as _ex:
         print(_ex)
     finally:
+
+        with open('olx.html','w',encoding='utf-8') as file:
+            file.write(driver.page_source)
         # ищем объявления
         soup = BeautifulSoup(driver.page_source, 'lxml')
 
@@ -123,7 +59,7 @@ def call_data_olx():
         except:
             link = 'no url'
         try:
-            area = item.find('p', class_='css-veheph er34gjf0').text.split()
+            area = item.find('p', class_='css-veheph er34gjf0').text.split('-')
         except:
             area = 'No area'
 
@@ -136,12 +72,3 @@ def call_data_olx():
             }
         )
     return data_olx
-
-
-# def main():
-#     call_data_rieltor()
-#     call_data_olx()
-
-
-# if __name__ == '__main__':
-#     main()
