@@ -15,17 +15,17 @@ soup = BeautifulSoup(src, 'lxml')
 room = ['1-room', '2-rooms', '3-rooms', '4-rooms']
 rooms = ['rooms[0]=1', 'rooms[1]=2', 'rooms[2]=3']
 city = [i.attrs['data-index-url']
-        for i in soup.find_all('div', class_='nav_item_option_geo_city js_nav_input')] # взять города из config
-
+        for i in soup.find_all('div', class_='nav_item_option_geo_city js_nav_input')]  # взять города из config
+sorti = ['bycreated', 'byprice', '-byprice']
 
 parametrs = {
-    'rooms': room[0],
-    'price_min': 'price_min=4000',
-    'price_max': '&price_max=9000',
+    'rooms': '',
+    'price_min': '',
+    'price_max': '',
     'city': city[0],
     'floor_min': '',
     'floor_max': '',
-    'sort': 'byprice'
+    'sort': ''
 }
 
 roomes = []
@@ -38,10 +38,12 @@ mn_price = int(input('Мин: '))
 mx_price = int(input('Мах: '))
 mn_floor = int(input('ЭМин: '))
 mx_floor = int(input('Эmax: '))
+sort = int(input(
+    '0-без сорт\n1-найновіші\n2-найдешевші\n3-найдорожчі\n'))
 
 if len(roomes) == 1:
     parametrs['rooms'] = room[roomes[0]-1] + '/?'
-else:
+elif len(roomes) > 1:
     list_of_room = []
     for i in roomes:
         list_of_room.append(rooms[i-1])
@@ -49,7 +51,7 @@ else:
     parametrs['rooms'] = '?' + '&'.join(list_of_room) + '&'
 
 if mn_price != 0:
-    parametrs['price_min'] = f'price_min={mn_price}'
+    parametrs['price_min'] = f'&price_min={mn_price}'
 if mx_price != 0:
     parametrs['price_max'] = f'&price_max={mx_price}'
 
@@ -58,17 +60,22 @@ if mn_floor != 0:
 if mx_floor != 0:
     parametrs['floor_max'] = f'&floor_max={mx_floor}'
 
-gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}&sort={parametrs["sort"]}'
+if sort != 0:
+    parametrs['sort'] = f'&sort={sorti[sort-1]}'
+
+gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}'
 
 
-link = f'https://rieltor.ua{parametrs["city"]}flats-rent/{gen_of_link}'
+link = f'https://rieltor.ua{parametrs["city"]}flats-rent/?{gen_of_link}'
 
+print('https://rieltor.ua/kiev/flats-rent/')
 print('https://rieltor.ua/kiev/flats-rent/2-rooms/?price_min=4000&price_max=9000&sort=byprice')
+print(link)
+
 print(
     'https://rieltor.ua/kiev/flats-rent/?rooms[0]=1&rooms[1]=2&price_min=4000&price_max=9000&sort=byprice')
 print(
     'https://rieltor.ua/rovno/flats-rent/?price_min=4000&price_max=9000&sort=-default&floor_min=6&floor_max=9&rooms[0]=1&rooms[1]=2')
-print(link)
 """
 
 def call_data_rieltor():

@@ -6,6 +6,79 @@ from selenium.webdriver.common.by import By
 from selenium import webdriver
 from bs4 import BeautifulSoup
 
+# заготовка под генерацию ссылки с параметрами
+"""
+from bs4 import BeautifulSoup
+with open('olx.html', 'r', encoding='utf-8') as file:
+    src = file.read()
+
+soup = BeautifulSoup(src, 'lxml')
+
+
+room = ['odnokomnatnye', 'dvuhkomnatnye', 'trehkomnatnye']
+city = ['/kiev/', '/odessa/', '/dnepr/', '/lvov/', '/harkov/', '/ivano-frankovsk/', '/hmelnitskij/', '/sumy/', '/nikolaev/', '/zaporozhje/', '/rovno/',
+                  '/chernigov/', '/vinnitsa/', '/chernovtsy/', '/ternopol/', '/poltava/', '/cherkassy/', '/zhitomir/', '/skyi/', 'kropyvnytskyi/', '/uzhgorod/', '/lutsk/', '/kherson/']
+sorti = ['created_at:desc', 'asc', 'desc']
+
+parametrs = {
+    'rooms': '',
+    'price_min': '',
+    'price_max': '',
+    'city': city[0],
+    'floor_min': '',
+    'floor_max': '',
+    'sort': ''
+}
+
+roomes = []
+c_room = int(input('Кол. комнат: '))
+while c_room != 0:
+    roomes.append(c_room)
+    c_room = int(input('Кол. комнат: '))
+roomes = list(set(roomes))
+mn_price = int(input('Мин: '))
+mx_price = int(input('Мах: '))
+mn_floor = int(input('ЭМин: '))
+mx_floor = int(input('Эmax: '))
+sort = int(input(
+    '0-без сорт\n1-найновіші\n2-найдешевші\n3-найдорожчі\n'))
+
+parametrs['rooms'] = '&'.join(
+    [f'search[filter_enum_number_of_rooms_string][{num}]={room[rom-1]}' for num, rom in enumerate(list(set(roomes)))])
+
+
+if mn_price != 0:
+    parametrs['price_min'] = f'&search[filter_float_price:from]={mn_price}'
+if mx_price != 0:
+    parametrs['price_max'] = f'&search[filter_float_price:to]={mx_price}'
+
+if mn_floor != 0:
+    parametrs['floor_min'] = f'&search[filter_float_floor:from]={mn_floor}'
+if mx_floor != 0:
+    parametrs['floor_max'] = f'&search[filter_float_floor:to]={mx_floor}'
+
+if sort == 1:
+    parametrs['sort'] = f'&search[order]={sorti[0]}'
+elif sort != 0:
+    parametrs['sort'] = f'&search[order]=filter_float_price:{sorti[sort-1]}'
+
+
+gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}'
+
+
+link = f'https://www.olx.ua/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir{parametrs["city"]}?{gen_of_link}'
+
+
+# print(
+#     'https://www.olx.ua/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/kiev/?search[filter_enum_number_of_rooms_string][0]=dvuhkomnatnye&search[filter_enum_number_of_rooms_string][1]=trehkomnatnye')
+# print(
+#     'https://www.olx.ua/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/kiev/?search[filter_float_price:from]=4000&search[filter_float_price:to]=9000')
+# print(
+#     'https://www.olx.ua/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/kiev/?search[filter_float_floor:from]=2&search[filter_float_floor:to]=4')
+# print('https://www.olx.ua/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/kiev/?search[filter_enum_number_of_rooms_string][0]=dvuhkomnatnye&search[filter_enum_number_of_rooms_string][1]=trehkomnatnye&search[filter_float_price:from]=4000&search[filter_float_price:to]=9000&search[filter_float_floor:from]=2&search[filter_float_floor:to]=5&search[order]=filter_float_price:asc')
+print(link)
+
+"""
 
 def call_data_olx():
 
