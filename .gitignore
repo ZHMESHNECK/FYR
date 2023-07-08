@@ -3,5 +3,3 @@ venv
 .vscode
 __pycache__
 data.json
-text.html
-olx.html
