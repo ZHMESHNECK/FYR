@@ -1,8 +1,70 @@
-
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 import requests
 
+
+## заготовка под генерацию ссылки с параметрами
+
+'''room = ['1', '2', '3']
+rooms = {'1,2': '1%2C2', '1,3': '1%2C3', '2,3': '2%2C3', '1,2,3': '1%2C2%2C3'}
+
+city = ['&city_id=29586', '&city_id=29585',
+        '&city_id=29587', '&city_id=29588', '&city_id=29595']
+
+sorti = ['default', 'date', 'nedorogo', 'elit']
+
+parametrs = {
+    'rooms': '',
+    'city': '',
+    'price_min': '',
+    'price_max': '',
+    'floor_min': '',
+    'floor_max': '',
+    'sort': sorti[0]
+}
+
+parametrs['city'] = city[int(
+    input('1-kiev\n2-odesa\n3-dnipro\n4-harkiv\n5-zaporijjya\n'))-1]
+
+roomes = []
+c_room = input('Кол. комнат: ')
+while c_room != '0':
+    roomes.append(c_room)
+    c_room = input('Кол. комнат: ')
+roomes = list(set(roomes))
+mn_price = input('Мин: ')
+mx_price = input('Мах: ')
+mn_floor = input('ЭМин: ')
+mx_floor = input('Эmax: ')
+sort = int(input(
+    '0-без сорт\n1-найновіші\n2-найдешевші\n3-найдорожчі\n'))
+
+if len(roomes) == 1:
+    parametrs['rooms'] = f'&rooms_id={roomes[0]}&rooms_url={roomes[0]}'
+elif len(roomes) > 1:
+    parametrs['rooms'] = f'&rooms_id={rooms[",".join(roomes)]}&rooms_url={rooms[",".join(roomes)]}'
+
+
+if mn_price != '0':
+    parametrs['price_min'] = f'&price_from={mn_price}'
+if mx_price != '0':
+    parametrs['price_max'] = f'&price_to={mx_price}'
+
+if mn_floor != '0':
+    parametrs['floor_min'] = f'&floor_from={mn_floor}'
+if mx_floor != '0':
+    parametrs['floor_max'] = f'&floor_to={mx_floor}'
+
+if sort != '0':
+    parametrs['sort'] = f'&price_sort={sorti[sort]}'
+
+gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}{parametrs["city"]}'
+
+link = f'https://www.country.ua/list/?action_id=2&action_url=rent&type_id=1&type_url=flat{gen_of_link}&filter_flat_type_id=1&filter_flat_type_url=flat&price_currency=uah'
+
+print(
+    'https://www.country.ua/list/?action_id=2&action_url=rent&type_id=1&type_url=flat&rooms_id=1%2C2&rooms_url=1%2C2&filter_flat_type_id=1&filter_flat_type_url=flat&price_currency=uah&price_from=4000&price_to=9000&floor_from=2&floor_to=5&city_id=29595&lang=ua&price_sort=default')
+print(link)'''
 
 def call_data_country():
 

@@ -18,11 +18,17 @@ dp = Dispatcher(bot)
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    start_buttons = ['🔎 Искать 🔍']
+    start_buttons = ['🔎 Искать 🔍', '🛠 Параметры 🛠']
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(*start_buttons)
 
-    await message.answer('Что именно искать', reply_markup=keyboard)
+    await message.answer('Приветствую!', reply_markup=keyboard)
+
+
+@dp.message_handler(Text(equals='🛠 Параметры 🛠'))
+async def settings(message: types.Message):
+    ## посмотерть кнопки
+    pass
 
 @dp.message_handler(Text(equals='🔎 Искать 🔍'))
 async def search(message: types.Message):
