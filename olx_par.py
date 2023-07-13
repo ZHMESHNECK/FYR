@@ -5,6 +5,9 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from bs4 import BeautifulSoup
+from aiogram.utils.markdown import hbold, hlink
+from aiogram import types
+import time
 
 # заготовка под генерацию ссылки с параметрами
 """
@@ -80,7 +83,8 @@ print(link)
 
 """
 
-def call_data_olx():
+
+async def call_data_olx(message: types.Message):
 
     ua = UserAgent()
     options = Options()
@@ -142,4 +146,24 @@ def call_data_olx():
                 "Ссылка": f'https://www.olx.ua{link}',
             }
         )
-    return data_olx
+
+    if data_olx == 'Old version':
+        for num, _ in enumerate(range(2), 2):
+            if data_olx == 'Old version':
+                message.answer(f'Попытка соединения с OLX №{num}')
+                time.sleep(5)
+                data_olx = call_data_olx()
+
+    # ответ с olx
+    if isinstance(data_olx, list):
+        for index, item in enumerate(data_olx):
+            card = f'{hlink(item.get("Название"), item.get("Ссылка"))}\n' \
+                f'{hbold("Цена: ")}{item.get("Цена")}\n' \
+                f'{hbold("Район: ")}{item.get("Район")}'
+
+            if index % 10 == 0:
+                time.sleep(3)
+
+            await message.answer(card)
+    else:
+        await message.answer('Не удалось соединиться с OLX')

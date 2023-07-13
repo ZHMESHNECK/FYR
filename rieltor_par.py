@@ -1,7 +1,9 @@
 from fake_useragent import UserAgent
+from aiogram import types
 from bs4 import BeautifulSoup
+from aiogram.utils.markdown import hbold, hlink
 import requests
-
+import time
 
 # заготовка под генерацию ссылки с параметрами
 """
@@ -78,7 +80,8 @@ print(
     'https://rieltor.ua/rovno/flats-rent/?price_min=4000&price_max=9000&sort=-default&floor_min=6&floor_max=9&rooms[0]=1&rooms[1]=2')
 """
 
-def call_data_rieltor():
+
+async def call_data_rieltor(message: types.Message):
 
     ua = UserAgent()
     city = 'kiev'
@@ -112,7 +115,8 @@ def call_data_rieltor():
         # 8 объявлений
         for div in mdiv[:8]:
             try:
-                price = div.find('div', class_='catalog-card-price').text.strip()
+                price = div.find(
+                    'div', class_='catalog-card-price').text.strip()
             except:
                 price = 'No price'
             try:
@@ -139,6 +143,18 @@ def call_data_rieltor():
                     }
                 )
                 dublicate.append(addres)
-        return data_rieltor
+        if len(data_rieltor)>=1:
+            for index, item in enumerate(data_rieltor):
+                card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
+                    f'{hbold("Цена: ")}{item.get("Цена")}\n' \
+                    f'{hbold("Район: ")}{item.get("Район")}'
+
+                if index % 10 == 0:
+                    time.sleep(3)
+
+                await message.answer(card)
+        else:
+            await message.answer('Ничего не найдено за заданными параметрами')
+        time.sleep(2)
     else:
-        return 'error'
+        await message.answer('Не удалось соединиться с rieltor.ua')

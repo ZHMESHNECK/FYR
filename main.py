@@ -1,5 +1,5 @@
 from utils.db.dbb import db,POSTGRES_URI
-from utils.db import com
+from utils.db import reg_commands
 import asyncio
 ##
 # https://www.youtube.com/watch?v=dcbuQMjHj_c&t=240s
@@ -10,20 +10,20 @@ async def db_test():
     await db.gino.drop_all()
     await db.gino.create_all()
 
-    await com.add_user(1, 'da')
-    await com.add_user(3, 'asdasd')
-    await com.add_user(4, 'dxzxczxc')
-    await com.add_user(5, 'rrrrr')
+    await reg_commands.add_user(1, 'da')
+    await reg_commands.add_user(3, 'asdasd')
+    await reg_commands.add_user(4, 'dxzxczxc')
+    await reg_commands.add_user(5, 'rrrrr')
 
-    count = await com.sel_all()
+    count = await reg_commands.sel_all()
     print(count)
 
-    users = await com.select_u(1)
+    users = await reg_commands.select_u(1)
     print(users)
 
-    await com.update_u(1, 'net')
+    await reg_commands.update_u(1, 'net')
 
-    users = await com.select_u(1)
+    users = await reg_commands.select_u(1)
     print(users)
 
 loop = asyncio.get_event_loop()

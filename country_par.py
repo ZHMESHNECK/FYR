@@ -1,6 +1,9 @@
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 import requests
+from aiogram import types
+from aiogram.utils.markdown import hbold, hlink
+import time
 
 
 ## заготовка под генерацию ссылки с параметрами
@@ -66,7 +69,7 @@ print(
     'https://www.country.ua/list/?action_id=2&action_url=rent&type_id=1&type_url=flat&rooms_id=1%2C2&rooms_url=1%2C2&filter_flat_type_id=1&filter_flat_type_url=flat&price_currency=uah&price_from=4000&price_to=9000&floor_from=2&floor_to=5&city_id=29595&lang=ua&price_sort=default')
 print(link)'''
 
-def call_data_country():
+async def call_data_country(message: types.Message):
 
     ua = UserAgent()
     city = 'kiev'
@@ -127,6 +130,16 @@ def call_data_country():
                     "Цена": price,
                     "Ссылка": 'https://www.country.ua'+link
                 })
-        return data_country
+        
+        ## ответ с country
+        for index, item in enumerate(data_country):
+            card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
+            f'{hbold("Цена: ")}{item.get("Цена")}\n'
+            
+            if index%10 == 0:
+                time.sleep(3)
+
+            await message.answer(card)
+        time.sleep(2)        
     else:
-        return 'error'
+        await message.answer('Не удалось соединиться с country.ua')

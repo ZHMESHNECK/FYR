@@ -1,4 +1,5 @@
 import environ
+from aiogram import Bot, Dispatcher, types
 
 env = environ.Env()
 env.read_env('.env')
@@ -13,3 +14,7 @@ user = env('POSTGRES_USER')
 password = env('POSTGRES_PASSWORD')
 
 POSTGRES_URI = f'postgresql://{user}:{password}@{host}/{db}'
+
+
+bot = Bot(token=env('TOKEN'), parse_mode=types.ParseMode.HTML)
+dp = Dispatcher(bot)
