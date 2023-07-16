@@ -1,6 +1,6 @@
-import environ
-from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram import Bot, Dispatcher, types
+import environ
 
 env = environ.Env()
 env.read_env('.env')

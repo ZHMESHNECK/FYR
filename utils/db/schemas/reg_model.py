@@ -1,5 +1,5 @@
-from utils.db.dbb import BaseModel
 from sqlalchemy import Column, BigInteger, String, sql, Integer
+from utils.db.dbb import BaseModel
 
 
 class User_model(BaseModel):

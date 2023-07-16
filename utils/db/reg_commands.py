@@ -17,10 +17,38 @@ async def sel_all():
 
 
 async def select_user(user_id):
-    print('ищем юзера')
     return await User_model.query.where(User_model.user_id == user_id).gino.first()
 
 
-async def update_u(user_id, new_name):
+async def update_user_c(user_id, param):
     user = await select_user(user_id)
-    await user.update(city=new_name).apply()
+    await user.update(city=param).apply()
+
+
+async def update_user_n_p(user_id, param):
+    user = await select_user(user_id)
+    await user.update(min_price=param).apply()
+
+async def update_user_x_p(user_id, param):
+    user = await select_user(user_id)
+    await user.update(max_price=param).apply()
+
+
+async def update_user_c_r(user_id, param):
+    user = await select_user(user_id)
+    await user.update(count_room=param).apply()
+
+
+async def update_user_n_f(user_id, param):
+    user = await select_user(user_id)
+    await user.update(min_floor=param).apply()
+
+
+async def update_user_x_f(user_id, param):
+    user = await select_user(user_id)
+    await user.update(max_floor=param).apply()
+
+
+async def update_user_s(user_id, param):
+    user = await select_user(user_id)
+    await user.update(sort=param).apply()

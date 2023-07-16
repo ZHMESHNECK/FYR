@@ -1,11 +1,11 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from utils.db.reg_commands import select_user, add_user
+from states.temporary_storage import registration, temp_reg
 from aiogram.dispatcher import FSMContext
+from utils.db.reg_commands import *
 from config import POSTGRES_URI
 from utils.db.dbb import db
 from aiogram import types
+from keyboards import *
 from config import dp
-from states.register import registration
 import traceback
 
 
@@ -13,19 +13,18 @@ async def check_register(message: types.Message):
     try:
         await db.set_bind(POSTGRES_URI)
         user = await select_user(message.from_user.id)
-        print(f'user {user}')
         if not user:
             await message.answer('У вас ещё не заданных параметров\nдавайте пройдём маленькую регистрацию ☺️')
             await start_reg(message)
         else:
             await message.answer(f'🛠 Параметры 🛠:\n'
-                                f'\n<b>Город</b> - {user.city}\n'
-                                f'\n<b>Мин. цена</b> - {user.min_price}\n'
-                                f'\n<b>Макс. цена</b> - {user.max_price}\n'
-                                f'\n<b>Кол. комнат</b> - {user.count_rooms}\n'
-                                f'\n<b>Мин. этаж</b> - {user.min_floor}\n'
-                                f'\n<b>Макс. этаж</b> - {user.max_floor}\n'
-                                f'\n<b>Сортировка</b> - {user.sort}\n')
+                                 f'\n<b>Город</b> - {user.city if user.city is not None else "Не указано"}\n'
+                                 f'\n<b>Мин. цена</b> - {str(user.min_price) + " грн" if user.min_price is not None else "Не указано"}\n'
+                                 f'\n<b>Макс. цена</b> - {str(user.max_price) + " грн" if user.max_price is not None else "Не указано"}\n'
+                                 f'\n<b>Кол. комнат</b> - {user.count_rooms if user.count_rooms is not None else "Не указано"}\n'
+                                 f'\n<b>Мин. этаж</b> - {user.min_floor if user.min_floor is not None else "Не указано"}\n'
+                                 f'\n<b>Макс. этаж</b> - {user.max_floor if user.max_floor is not None else "Не указано"}\n'
+                                 f'\n<b>Сортировка</b> - {user.sort if user.sort is not None else "Не указано"}\n', reply_markup=view_param)
     except:
         await message.answer('Не удалось подключиться к базе данных')
 
@@ -35,26 +34,57 @@ async def start_reg(message: types.Message):
     await registration.city.set()
 
 
+@dp.message_handler(state=temp_reg.choice_param)
+async def single_change(message: types.Message, state: FSMContext):
+    user = await select_user(message.from_user.id)
+    data = {'Город': 'city', 'Кол. комнат': 'count_rooms',
+            'Мин. цена': 'min_price', 'Макс. цена': 'max_price', 'Мин. этаж': 'min_floor', 'Макс. этаж': 'max_floor', 'Сортировка': 'sort'}
+    data_2 = {'city': [user.city, city_key],
+              'min_price': [user.min_price, price_key],
+              'max_price': [user.max_price, price_m_key],
+              'count_rooms': [user.count_rooms, room_key],
+              'min_floor': [user.min_floor, floor_n_key],
+              'max_floor': [user.max_floor, floor_x_key],
+              'sort': [user.sort, sort_key]}
+    param = data.get(message.text)
+    print(f'param {param}')
+
+    if param:
+        await message.answer(f'Меняем {message.text} - <b>{data_2[param][0]}</b> на:', reply_markup=data_2[param][1])
+        await state.update_data(choice_param=param)
+        await temp_reg.param.set()
+
+# исправить 2-3
+# добавить проверку города
+@dp.message_handler(state=temp_reg.param)
+async def single_change_2(message: types.Message, state: FSMContext):
+    await state.update_data(param=message.text)
+    print(f'dads {message.text}')
+    data = await state.get_data()
+    print(f'data {data}')
+    if data['choice_param'] == 'city':
+        await update_user_c(message.from_user.id, data['param'])
+    elif data['choice_param'] == 'min_price':
+        await update_user_n_p(message.from_user.id, data['param'])
+    elif data['choice_param'] == 'max_price':
+        await update_user_x_p(message.from_user.id, data['param'])
+    elif data['choice_param'] == 'count_room':
+        await update_user_c_r(message.from_user.id, data['param'])
+    elif data['choice_param'] == 'min_floor':
+        await update_user_n_f(message.from_user.id, data['param'])
+    elif data['choice_param'] == 'max_floor':
+        await update_user_x_f(message.from_user.id, data['param'])
+    elif data['choice_param'] == 'sort':
+        await update_user_s(message.from_user.id, data['param'])
+
+    await state.finish()
+    await message.answer('✅ Успешно обновлено! ✅',reply_markup=keyboard)
+
+
 @dp.message_handler(state=registration.city)
 async def get_city(message: types.Message, state: FSMContext):
     # добавить проверку на существующий город (config)
-    price_key = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text='3000'), KeyboardButton(text='4000')
-            ],
-            [
-                KeyboardButton(text='5000'), KeyboardButton(text='6000')
-            ],
-            [
-                KeyboardButton(text='7000'), KeyboardButton(text='8000')
-            ],
-            [
-                KeyboardButton(text='Пропуск')
-            ]
-        ],
-        resize_keyboard=True,
-    )
+
     if message.text == 'Пропуск':
         await state.update_data(city=None)
         await message.answer(f'Окей, буду искать в городе по умолчанию\nУкажите пожалуйста, <b>от</b> какой суммы искать', reply_markup=price_key)
@@ -67,23 +97,7 @@ async def get_city(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.min_price)
 async def get_min_price(message: types.Message, state: FSMContext):
-    price_m_key = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text='6000'), KeyboardButton(text='7000')
-            ],
-            [
-                KeyboardButton(text='8000'), KeyboardButton(text='9000')
-            ],
-            [
-                KeyboardButton(text='10.000'), KeyboardButton(text='11.000')
-            ],
-            [
-                KeyboardButton(text='Пропуск')
-            ]
-        ],
-        resize_keyboard=True
-    )
+
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, начальная цена не важна.\nУкажите <b>до</b> какой суммы искать', reply_markup=price_m_key)
@@ -105,24 +119,7 @@ async def get_min_price(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.max_price)
 async def get_max_price(message: types.Message, state: FSMContext):
-    room_key = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text='1'), KeyboardButton(text='1-2')
-            ],
-            [
-                KeyboardButton(text='2'), KeyboardButton(text='1-3')
-            ],
-            [
-                KeyboardButton(text='3'), KeyboardButton(text='2-3')
-            ],
-            [
-                KeyboardButton(text='Пропуск')
-            ]
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=True
-    )
+
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, конечная цена не важна.\nУкажите количество комнат', reply_markup=room_key)
@@ -144,26 +141,7 @@ async def get_max_price(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.count_rooms)
 async def get_c_count_rooms(message: types.Message, state: FSMContext):
-    floor_n_key = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text='1'), KeyboardButton(text='2')
-            ],
-            [
-                KeyboardButton(text='3'), KeyboardButton(text='4')
-            ],
-            [
-                KeyboardButton(text='5'), KeyboardButton(text='6')
-            ],
-            [
-                KeyboardButton(text='7'), KeyboardButton(text='8')
-            ],
-            [
-                KeyboardButton(text='Пропуск')
-            ]
-        ],
-        resize_keyboard=True,
-    )
+# исправить 2-3
     try:
         if message.text == 'Пропуск':
 
@@ -173,7 +151,7 @@ async def get_c_count_rooms(message: types.Message, state: FSMContext):
         else:
             mes = message.text.replace('-', '')
             if message.text.isnumeric():
-                if len(message.text) in (1, 2) and int(message.text) < 14:
+                if len(message.text) in (1, 2) and int(message.text) < 24:
                     await state.update_data(count_rooms=int(mes))
                     await message.answer(f'Принял, буду искать {message.text}-х комнатую квартиру\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную но не выше <b>20</b> этажа', reply_markup=floor_n_key)
                     await registration.min_floor.set()
@@ -187,26 +165,7 @@ async def get_c_count_rooms(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.min_floor)
 async def get_min_floor(message: types.Message, state: FSMContext):
-    floor_x_key = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text='1'), KeyboardButton(text='2')
-            ],
-            [
-                KeyboardButton(text='3'), KeyboardButton(text='4')
-            ],
-            [
-                KeyboardButton(text='5'), KeyboardButton(text='6')
-            ],
-            [
-                KeyboardButton(text='7'), KeyboardButton(text='8')
-            ],
-            [
-                KeyboardButton(text='Пропуск')
-            ]
-        ],
-        resize_keyboard=True,
-    )
+
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, с какого этажа искать не важно.\nУкажите <b>до</b> какого этажа искать квартиру', reply_markup=floor_x_key)
@@ -225,24 +184,7 @@ async def get_min_floor(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.max_floor)
 async def get_max_floor(message: types.Message, state: FSMContext):
-    sort_key = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text='Новинки')
-            ],
-            [
-                KeyboardButton(text='Дешёвые')
-            ],
-            [
-                KeyboardButton(text='Дорогие')
-            ],
-            [
-                KeyboardButton(text='Пропуск')
-            ]
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=True
-    )
+
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, <b>до</b> какого этажа искать не важно.\nУкажите сортировку объявлений', reply_markup=sort_key)
@@ -261,9 +203,7 @@ async def get_max_floor(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.sort)
 async def get_sort(message: types.Message, state: FSMContext):
-    start_buttons = ['🔎 Искать 🔍', '🛠 регистрация 🛠']
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(*start_buttons)
+
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, сортировка будет по стандарту', reply_markup=keyboard)
@@ -271,9 +211,14 @@ async def get_sort(message: types.Message, state: FSMContext):
         elif message.text in ('Новинки', 'Дешёвые', 'Дорогие'):
             await state.update_data(max_floor=message.text)
             await message.answer(f'Принял, буду искать по {message.text}')
-        await state.finish()
-        da = await state.get_data()
-        if await add_user(message.from_user.id, da.get('city'), da.get('min_price'), da.get('max_price'), da.get('count_rooms'), da.get('min_floor'), da.get('max_floor'), da.get('sort')):
+            await state.finish()
+        else:
+            # проверить
+            await message.answer('Не удалось распознать вид сортировки\nвыбирите из доступных вам', reply_markup=sort_key)
+            raise
+
+        data = await state.get_data()
+        if await add_user(message.from_user.id, data.get('city'), data.get('min_price'), data.get('max_price'), data.get('count_rooms'), data.get('min_floor'), data.get('max_floor'), data.get('sort')):
             await message.answer('Вы успешно зарегистрировались', reply_markup=keyboard)
         else:
             await message.answer('Произошла ошибка при сохранении данных', reply_markup=keyboard)

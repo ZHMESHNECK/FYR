@@ -9,3 +9,7 @@ class registration(StatesGroup):
     min_floor = State()
     max_floor = State()
     sort = State()
+
+class temp_reg(StatesGroup):
+    choice_param = State()
+    param = State()
