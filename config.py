@@ -1,5 +1,6 @@
 import environ
 from aiogram import Bot, Dispatcher, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 env = environ.Env()
 env.read_env('.env')
@@ -17,4 +18,4 @@ POSTGRES_URI = f'postgresql://{user}:{password}@{host}/{db}'
 
 
 bot = Bot(token=env('TOKEN'), parse_mode=types.ParseMode.HTML)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())

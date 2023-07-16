@@ -6,11 +6,14 @@ from utils.db.registration import check_register
 from olx_par import call_data_olx
 from config import dp
 
-## https://www.youtube.com/watch?v=rgmehqKzWO0
-## https://www.youtube.com/watch?v=dcbuQMjHj_c&t=240s
+# https://www.youtube.com/watch?v=rgmehqKzWO0
+# https://www.youtube.com/watch?v=dcbuQMjHj_c&t=240s
+# https://pythonru.com/biblioteki/shemy-v-sqlalchemy-orm
+
+
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    start_buttons = ['🔎 Искать 🔍', '🛠 гистрациярыры 🛠']
+    start_buttons = ['🔎 Искать 🔍', '🛠 регистрация 🛠']
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(*start_buttons)
 
@@ -28,17 +31,17 @@ async def search(message: types.Message):
     await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
 
     # ## запуск функции для RIELTOR
-    await call_data_rieltor(message)
+    # await call_data_rieltor(message)
 
     await message.answer('Начинаю поиск на 📦 OLX 📦')
 
     # ## запуск функции для OLX
-    await call_data_olx(message)
+    # await call_data_olx(message)
 
     await message.answer('Начинаю поиск на 🏠 country 🏠')
 
     # запуск функции для country
-    await call_data_country(message)
+    # await call_data_country(message)
 
 
 def main():
