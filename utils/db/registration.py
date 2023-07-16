@@ -10,16 +10,24 @@ import traceback
 
 
 async def check_register(message: types.Message):
-    # try:
-    await db.set_bind(POSTGRES_URI)
-    check_user = await select_user(message.from_user.id)
-    print(f'check_user {check_user}')
-    if not check_user:
-        await start_reg(message)
-    else:
-        await message.answer('Вы уже зарегистрированы')
-    # except:
-    #     await message.answer('Не удалось подключиться к базе данных')
+    try:
+        await db.set_bind(POSTGRES_URI)
+        user = await select_user(message.from_user.id)
+        print(f'user {user}')
+        if not user:
+            await message.answer('У вас ещё не заданных параметров\nдавайте пройдём маленькую регистрацию ☺️')
+            await start_reg(message)
+        else:
+            await message.answer(f'🛠 Параметры 🛠:\n'
+                                f'\n<b>Город</b> - {user.city}\n'
+                                f'\n<b>Мин. цена</b> - {user.min_price}\n'
+                                f'\n<b>Макс. цена</b> - {user.max_price}\n'
+                                f'\n<b>Кол. комнат</b> - {user.count_rooms}\n'
+                                f'\n<b>Мин. этаж</b> - {user.min_floor}\n'
+                                f'\n<b>Макс. этаж</b> - {user.max_floor}\n'
+                                f'\n<b>Сортировка</b> - {user.sort}\n')
+    except:
+        await message.answer('Не удалось подключиться к базе данных')
 
 
 async def start_reg(message: types.Message):

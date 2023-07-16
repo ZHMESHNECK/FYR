@@ -13,14 +13,14 @@ from config import dp
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    start_buttons = ['🔎 Искать 🔍', '🛠 регистрация 🛠']
+    start_buttons = ['🔎 Искать 🔍', '🛠 параметры 🛠']
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(*start_buttons)
 
     await message.answer('Приветствую!', reply_markup=keyboard)
 
 
-@dp.message_handler(Text(equals='🛠 регистрация 🛠'))
+@dp.message_handler(Text(equals='🛠 параметры 🛠'))
 async def settings(message: types.Message):
     await check_register(message)
 
