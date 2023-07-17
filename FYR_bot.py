@@ -1,4 +1,4 @@
-from utils.db.registration import check_register, single_change
+from utils.db.registration import check_register
 from states.temporary_storage import temp_reg
 from aiogram.dispatcher.filters import Text
 from rieltor_par import call_data_rieltor

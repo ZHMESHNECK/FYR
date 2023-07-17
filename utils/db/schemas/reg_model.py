@@ -8,7 +8,7 @@ class User_model(BaseModel):
     city = Column(String(25), nullable=True)
     min_price = Column(BigInteger, nullable=True)
     max_price = Column(BigInteger, nullable=True)
-    count_rooms = Column(Integer, nullable=True)
+    count_rooms = Column(String(3), nullable=True)
     min_floor = Column(Integer, nullable=True)
     max_floor = Column(Integer, nullable=True)
     sort = Column(String(25), nullable=True)
