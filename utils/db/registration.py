@@ -4,6 +4,7 @@ from utils.db.reg_commands import *
 from config import POSTGRES_URI
 from utils.db.dbb import db
 from aiogram import types
+from utils.check import *
 from keyboards import *
 from config import dp
 import traceback
@@ -36,64 +37,92 @@ async def start_reg(message: types.Message):
 
 @dp.message_handler(state=temp_reg.choice_param)
 async def single_change(message: types.Message, state: FSMContext):
+    await db.set_bind(POSTGRES_URI)
     user = await select_user(message.from_user.id)
     data = {'Город': 'city', 'Кол. комнат': 'count_rooms',
             'Мин. цена': 'min_price', 'Макс. цена': 'max_price', 'Мин. этаж': 'min_floor', 'Макс. этаж': 'max_floor', 'Сортировка': 'sort'}
     data_2 = {'city': [user.city, city_key],
-              'min_price': [user.min_price, price_key],
-              'max_price': [user.max_price, price_m_key],
+              'min_price': [user.min_price, price_n_key],
+              'max_price': [user.max_price, price_x_key],
               'count_rooms': [user.count_rooms, room_key],
               'min_floor': [user.min_floor, floor_n_key],
               'max_floor': [user.max_floor, floor_x_key],
               'sort': [user.sort, sort_key]}
     param = data.get(message.text)
-    print(f'param {param}')
 
     if param:
         await message.answer(f'Меняем {message.text} - <b>{data_2[param][0]}</b> на:', reply_markup=data_2[param][1])
         await state.update_data(choice_param=param)
         await temp_reg.param.set()
 
-# добавить проверку города
-
 
 @dp.message_handler(state=temp_reg.param)
 async def single_change_2(message: types.Message, state: FSMContext):
     await state.update_data(param=message.text)
-    print(f'dads {message.text}')
     data = await state.get_data()
-    print(f'data {data}')
-    if data['choice_param'] == 'city':
-        await update_user_c(message.from_user.id, data['param'])
-    elif data['choice_param'] == 'min_price':
-        await update_user_n_p(message.from_user.id, data['param'])
-    elif data['choice_param'] == 'max_price':
-        await update_user_x_p(message.from_user.id, data['param'])
-    elif data['choice_param'] == 'count_room':
-        await update_user_c_r(message.from_user.id, data['param'])
-    elif data['choice_param'] == 'min_floor':
-        await update_user_n_f(message.from_user.id, data['param'])
-    elif data['choice_param'] == 'max_floor':
-        await update_user_x_f(message.from_user.id, data['param'])
-    elif data['choice_param'] == 'sort':
-        await update_user_s(message.from_user.id, data['param'])
-
+    try:
+        if data['choice_param'] == 'city':
+            if check_city(data['param']):
+                await update_user_c(message.from_user.id, data['param'])
+            else:
+                await message.answer('Не удалось распознать город для поиска.\nИспользуйте доступные города предложенные на клавиатуре 👇', reply_markup=city_key)
+                return
+        elif data['choice_param'] == 'min_price':
+            if check_num(data['param']):
+                await update_user_n_p(message.from_user.id, data['param'])
+            else:
+                await message.answer('Не удалось распознать число', reply_markup=price_n_key)
+                return
+        elif data['choice_param'] == 'max_price':
+            if check_num(data['param']):
+                await update_user_x_p(message.from_user.id, data['param'])
+            else:
+                await message.answer('Не удалось распознать число', reply_markup=price_x_key)
+                return
+        elif data['choice_param'] == 'count_room':
+            if check_c_room(data['param']):
+                await update_user_c_r(message.from_user.id, data['param'])
+            else:
+                await message.answer('Не удалось распознать количество комнат', reply_markup=room_key)
+                return
+        elif data['choice_param'] == 'min_floor':
+            if check_num(data['param']):
+                await update_user_n_f(message.from_user.id, data['param'])
+            else:
+                await message.answer('Не удалось распознать число', reply_markup=floor_n_key)
+                return
+        elif data['choice_param'] == 'max_floor':
+            if check_num(data['param']):
+                await update_user_x_f(message.from_user.id, data['param'])
+            else:
+                await message.answer('Не удалось распознать число', reply_markup=floor_x_key)
+                return
+        elif data['choice_param'] == 'sort':
+            if check_sort(data['param']):
+                await update_user_s(message.from_user.id, data['param'])
+            else:
+                await message.answer('Не удалось распознать сортировку', reply_markup=sort_key)
+                return
+    except:
+        await message.answer('При обновлении данных произошла ошибка')
     await state.finish()
     await message.answer('✅ Успешно обновлено! ✅', reply_markup=keyboard)
 
 
 @dp.message_handler(state=registration.city)
 async def get_city(message: types.Message, state: FSMContext):
-    # добавить проверку на существующий город (config)
 
     if message.text == 'Пропуск':
         await state.update_data(city=None)
-        await message.answer(f'Окей, буду искать в городе по умолчанию.\nУкажите пожалуйста, <b>от</b> какой суммы искать', reply_markup=price_key)
+        await message.answer(f'Окей, буду искать в городе по умолчанию.\nУкажите пожалуйста, <b>от</b> какой суммы искать', reply_markup=price_n_key)
         await registration.min_price.set()
     else:
-        await state.update_data(city=message.text)
-        await message.answer(f'Принял, буду искать в городе <b>{message.text}</b>.\nУкажите <b>от</b> какой суммы искать', reply_markup=price_key)
-        await registration.min_price.set()
+        if check_city(message.text):
+            await state.update_data(city=message.text)
+            await message.answer(f'Принял, буду искать в городе <b>{message.text}</b>.\nУкажите <b>от</b> какой суммы искать', reply_markup=price_n_key)
+            await registration.min_price.set()
+        else:
+            await message.answer('Не удалось распознать город для поиска.\nИспользуйте доступные города предложенные на клавиатуре 👇')
 
 
 @dp.message_handler(state=registration.min_price)
@@ -101,7 +130,7 @@ async def get_min_price(message: types.Message, state: FSMContext):
 
     try:
         if message.text == 'Пропуск':
-            await message.answer('Окей, начальная цена не важна.\nУкажите <b>до</b> какой суммы искать', reply_markup=price_m_key)
+            await message.answer('Окей, начальная цена не важна.\nУкажите <b>до</b> какой суммы искать', reply_markup=price_x_key)
             await state.update_data(min_price=None)
             await registration.max_price.set()
         else:
@@ -110,7 +139,7 @@ async def get_min_price(message: types.Message, state: FSMContext):
                     await message.answer('Ошибка\nЧисло выходит из допустимого диапазона')
                 else:
                     await state.update_data(min_price=int(message.text))
-                    await message.answer(f'Принял, буду искать от <b>{message.text}</b> грн.\nУкажите <b>до</b> какой суммы искать', reply_markup=price_m_key)
+                    await message.answer(f'Принял, буду искать от <b>{message.text}</b> грн.\nУкажите <b>до</b> какой суммы искать', reply_markup=price_x_key)
                     await registration.max_price.set()
             else:
                 await message.answer('Ошибка\nВведенно не число')
@@ -142,14 +171,13 @@ async def get_max_price(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.count_rooms)
 async def get_count_rooms(message: types.Message, state: FSMContext):
-    # исправить 2-3
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, количество комнат не важно.\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную но не выше <b>20</b> этажа', reply_markup=floor_n_key)
             await state.update_data(count_rooms=None)
             await registration.min_floor.set()
         else:
-            if message.text in ('1', '2', '3', '1-2', '1-3', '2-3'):
+            if check_c_room(message.text):
                 await state.update_data(count_rooms=message.text)
                 await message.answer(f'Принял, буду искать {message.text}-х комнатую квартиру\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную но не выше <b>20</b> этажа', reply_markup=floor_n_key)
                 await registration.min_floor.set()
@@ -204,11 +232,10 @@ async def get_sort(message: types.Message, state: FSMContext):
         if message.text == 'Пропуск':
             await message.answer('Окей, сортировка будет по стандарту', reply_markup=keyboard)
             await state.update_data(sort=None)
-        elif message.text in ('Новинки', 'Дешёвые', 'Дорогие'):
-            await state.update_data(max_floor=message.text)
-            await message.answer(f'Принял, буду искать по {message.text}')
+        elif check_sort(message.text):
+            await state.update_data(sort=message.text)
+            await message.answer(f'Принял, буду искать по {message.text}', reply_markup=keyboard)
         else:
-            # проверить
             await message.answer('Не удалось распознать вид сортировки.\nВыбирите из доступных вам', reply_markup=sort_key)
             raise
 

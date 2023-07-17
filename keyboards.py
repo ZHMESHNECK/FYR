@@ -51,9 +51,10 @@ change_board = ReplyKeyboardMarkup(
         ],
     ],
     resize_keyboard=True,
+    one_time_keyboard=True
 )
 
-price_key = ReplyKeyboardMarkup(
+price_n_key = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='3000'), KeyboardButton(text='4000')
@@ -69,9 +70,10 @@ price_key = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
+    one_time_keyboard=True
 )
 
-price_m_key = ReplyKeyboardMarkup(
+price_x_key = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='6000'), KeyboardButton(text='7000')
@@ -86,7 +88,8 @@ price_m_key = ReplyKeyboardMarkup(
             KeyboardButton(text='Пропуск')
         ]
     ],
-    resize_keyboard=True
+    resize_keyboard=True,
+    one_time_keyboard=True
 )
 
 room_key = ReplyKeyboardMarkup(
@@ -127,6 +130,7 @@ floor_n_key = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
+    one_time_keyboard=True
 )
 
 floor_x_key = ReplyKeyboardMarkup(
@@ -148,6 +152,7 @@ floor_x_key = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
+    one_time_keyboard=True
 )
 
 sort_key = ReplyKeyboardMarkup(
