@@ -8,8 +8,8 @@ from olx_par import call_data_olx
 from keyboards import *
 from config import dp
 
-# https://www.youtube.com/watch?v=rgmehqKzWO0
 # https://www.youtube.com/watch?v=dcbuQMjHj_c&t=240s
+# https://www.youtube.com/watch?v=rgmehqKzWO0
 # https://pythonru.com/biblioteki/shemy-v-sqlalchemy-orm
 
 

@@ -4,9 +4,19 @@ import environ
 
 env = environ.Env()
 env.read_env('.env')
-city = ['/kiev/', '/odessa/', '/dnepr/', '/lvov/', '/harkov/', '/ivano-frankovsk/', '/hmelnitskij/', '/sumy/', '/nikolaev/', '/zaporozhje/', '/rovno/',
-                  '/chernigov/', '/vinnitsa/', '/chernovtsy/', '/ternopol/', '/poltava/', '/cherkassy/', '/zhitomir/', '/kropyvnytskyi/', '/uzhgorod/', '/lutsk/', '/kherson/']
 
+
+city = {
+    'Киев': ['kiev', 'kiev', 'flat'],
+    'Одесса': ['odessa', 'odessa', 'odesa'],
+    'Львов': ['lvov', 'lvov', None],
+    'Днепр': ['dnepr', 'dnepr', 'dnipro'],
+    'Харьков': ['kharkov', 'harkov', 'harkiv'],
+    'Запорожье': ['zaporozhe', 'zaporozhje', 'zaporijjya'],
+    'Чернигов': ['chernigov', 'chernigov', None],
+    'Черкасы': ['cherkassy', 'cherkassy', None],
+    'Ужгород': ['uzhgorod', 'uzhgorod', None]
+}
 
 host = env('POSTGRES_HOST')
 port = env('POSTGRES_PORT')

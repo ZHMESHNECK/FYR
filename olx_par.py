@@ -1,12 +1,14 @@
-from fake_useragent import UserAgent
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
+from aiogram.utils.markdown import hbold, hlink
+from utils.db.reg_commands import select_user
 from selenium.webdriver.common.by import By
+from fake_useragent import UserAgent
 from selenium import webdriver
 from bs4 import BeautifulSoup
-from aiogram.utils.markdown import hbold, hlink
 from aiogram import types
+from config import city
 import time
 
 # заготовка под генерацию ссылки с параметрами
@@ -93,6 +95,18 @@ async def call_data_olx(message: types.Message):
     options.add_argument('--headless')
 
     driver = webdriver.Firefox(options=options)
+
+    users_param = await select_user(message.from_user.id)
+
+    parametrs = {
+        'rooms': users_param.count_rooms,
+        'price_min': users_param.min_price,
+        'price_max': users_param.max_price,
+        'city': city[users_param.city][0],
+        'floor_min': users_param.min_floor,
+        'floor_max': users_param.max_floor,
+        'sort': users_param.sort
+    }
 
     url = f'https://www.olx.ua/d/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/?currency=UAH&search%5Border%5D=filter_float_price:asc'
 
