@@ -1,8 +1,9 @@
+from aiogram.utils.markdown import hbold, hlink
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
-import requests
 from aiogram import types
-from aiogram.utils.markdown import hbold, hlink
+from config import city
+import requests
 import time
 
 
@@ -69,20 +70,18 @@ print(
     'https://www.country.ua/list/?action_id=2&action_url=rent&type_id=1&type_url=flat&rooms_id=1%2C2&rooms_url=1%2C2&filter_flat_type_id=1&filter_flat_type_url=flat&price_currency=uah&price_from=4000&price_to=9000&floor_from=2&floor_to=5&city_id=29595&lang=ua&price_sort=default')
 print(link)'''
 
-async def call_data_country(message: types.Message):
+async def call_data_country(message: types.Message, user_param):
 
     ua = UserAgent()
-    city = 'kiev'
-    price_min = ''
-    price_max = ''
-    sort = "byprice"
 
-    room = ''
-
-    params = {
-        "price_min": price_min,
-        "price_max": price_max,
-        "sort": sort
+    parametrs = {
+        'rooms': user_param.count_rooms,
+        'price_min': user_param.min_price,
+        'price_max': user_param.max_price,
+        'city': city[user_param.city][2],
+        'floor_min': user_param.min_floor,
+        'floor_max': user_param.max_floor,
+        'sort': user_param.sort
     }
 
     url = 'https://www.country.ua/ua/rent/flat.html'
@@ -92,7 +91,6 @@ async def call_data_country(message: types.Message):
     response = requests.get(
         url=url,
         headers={'user-agent': f'{ua.random}'},
-        params=params
     )
     if response.status_code == 200:
         # with open('counry.html', 'r', encoding='utf-8') as file:

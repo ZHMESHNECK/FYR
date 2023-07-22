@@ -18,6 +18,13 @@ city = {
     'Ужгород': ['uzhgorod', 'uzhgorod', None]
 }
 
+sort = {
+    'Новинки': ['created_at:desc', 'bycreated', 'date'],
+    'Дешёвые': ['asc', 'byprice', 'nedorogo'],
+    'Дорогие': ['desc', '-byprice', 'elit'],
+    'Пропуск': ['', '', 'default']
+}
+
 host = env('POSTGRES_HOST')
 port = env('POSTGRES_PORT')
 db = env('POSTGRES_DB')

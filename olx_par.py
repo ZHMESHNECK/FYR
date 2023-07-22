@@ -2,13 +2,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
 from aiogram.utils.markdown import hbold, hlink
-from utils.db.reg_commands import select_user
 from selenium.webdriver.common.by import By
 from fake_useragent import UserAgent
 from selenium import webdriver
+from config import city, sort
 from bs4 import BeautifulSoup
 from aiogram import types
-from config import city
 import time
 
 # заготовка под генерацию ссылки с параметрами
@@ -86,7 +85,30 @@ print(link)
 """
 
 
-async def call_data_olx(message: types.Message):
+async def call_data_olx(message: types.Message, user_param):
+    data_olx = await call_data_olx_2(message, user_param)
+    if data_olx == 'Old version':
+        for num, _ in enumerate(range(2), 2):
+            if data_olx == 'Old version':
+                await message.answer(f'Попытка соединения с OLX №{num}')
+                time.sleep(5)
+                data_olx = await call_data_olx_2(message, user_param)
+    # ответ с olx
+    if isinstance(data_olx, list):
+        for index, item in enumerate(data_olx):
+            card = f'{hlink(item.get("Название"), item.get("Ссылка"))}\n' \
+                f'{hbold("Цена: ")}{item.get("Цена")}\n' \
+                f'{hbold("Район: ")}{item.get("Район")}'
+
+            if index % 10 == 0:
+                time.sleep(3)
+
+            await message.answer(card)
+    else:
+        await message.answer('Не удалось соединиться с OLX')
+
+
+async def call_data_olx_2(message: types.Message, user_param):
 
     ua = UserAgent()
     options = Options()
@@ -96,19 +118,19 @@ async def call_data_olx(message: types.Message):
 
     driver = webdriver.Firefox(options=options)
 
-    users_param = await select_user(message.from_user.id)
-
+    room = ['odnokomnatnye', 'dvuhkomnatnye', 'trehkomnatnye']
     parametrs = {
-        'rooms': users_param.count_rooms,
-        'price_min': users_param.min_price,
-        'price_max': users_param.max_price,
-        'city': city[users_param.city][0],
-        'floor_min': users_param.min_floor,
-        'floor_max': users_param.max_floor,
-        'sort': users_param.sort
+        'rooms': "&".join([f'search[filter_enum_number_of_rooms_string][{num}]={room[int(rom)-1]}' for num, rom in enumerate(list(map(int, user_param.count_rooms.replace('-', ''))))]) if user_param.count_rooms is not None else "",
+        'price_min': f'&search[filter_float_price:from]={user_param.min_price}' if user_param.min_price is not None else "",
+        'price_max': f'&search[filter_float_price:to]={user_param.max_price}' if user_param.max_price is not None else "",
+        'city': city[user_param.city][0],
+        'floor_min': f'&search[filter_float_floor:from]={user_param.min_floor}' if user_param.min_floor is not None else "",
+        'floor_max': f'&search[filter_float_floor:to]={user_param.max_floor}' if user_param.max_floor is not None else "",
+        'sort': f'&search[order]=filter_float_price:{sort[user_param.sort][0]}' if user_param.sort is not None else sort['Пропуск'][0]
     }
+    gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}'
 
-    url = f'https://www.olx.ua/d/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/?currency=UAH&search%5Border%5D=filter_float_price:asc'
+    url = f'https://www.olx.ua/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/{parametrs["city"]}/?{gen_of_link}'
 
     # Читаем страницу olx
     try:
@@ -160,24 +182,4 @@ async def call_data_olx(message: types.Message):
                 "Ссылка": f'https://www.olx.ua{link}',
             }
         )
-
-    if data_olx == 'Old version':
-        for num, _ in enumerate(range(2), 2):
-            if data_olx == 'Old version':
-                message.answer(f'Попытка соединения с OLX №{num}')
-                time.sleep(5)
-                data_olx = call_data_olx()
-
-    # ответ с olx
-    if isinstance(data_olx, list):
-        for index, item in enumerate(data_olx):
-            card = f'{hlink(item.get("Название"), item.get("Ссылка"))}\n' \
-                f'{hbold("Цена: ")}{item.get("Цена")}\n' \
-                f'{hbold("Район: ")}{item.get("Район")}'
-
-            if index % 10 == 0:
-                time.sleep(3)
-
-            await message.answer(card)
-    else:
-        await message.answer('Не удалось соединиться с OLX')
+    return data_olx

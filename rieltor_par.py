@@ -1,7 +1,8 @@
-from fake_useragent import UserAgent
-from aiogram import types
-from bs4 import BeautifulSoup
 from aiogram.utils.markdown import hbold, hlink
+from fake_useragent import UserAgent
+from bs4 import BeautifulSoup
+from aiogram import types
+from config import city
 import requests
 import time
 
@@ -81,30 +82,27 @@ print(
 """
 
 
-async def call_data_rieltor(message: types.Message):
+async def call_data_rieltor(message: types.Message, user_param):
 
     ua = UserAgent()
-    city = 'kiev'
-    price_min = ''
-    price_max = ''
-    sort = "byprice"
 
-    room = ''
-
-    params = {
-        "price_min": price_min,
-        "price_max": price_max,
-        "sort": sort
+    parametrs = {
+        'rooms': user_param.count_rooms,
+        'price_min': user_param.min_price,
+        'price_max': user_param.max_price,
+        'city': city[user_param.city][1],
+        'floor_min': user_param.min_floor,
+        'floor_max': user_param.max_floor,
+        'sort': user_param.sort
     }
 
-    url = 'https://rieltor.ua/{}/flats-rent/{}'.format(city, room)
+    url = 'https://rieltor.ua/{}/flats-rent/{}'
 
     data_rieltor = []
 
     response = requests.get(
         url=url,
         headers={'user-agent': f'{ua.random}'},
-        params=params
     )
     if response.status_code == 200:
 
@@ -143,7 +141,7 @@ async def call_data_rieltor(message: types.Message):
                     }
                 )
                 dublicate.append(addres)
-        if len(data_rieltor)>=1:
+        if len(data_rieltor) >= 1:
             for index, item in enumerate(data_rieltor):
                 card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
                     f'{hbold("Цена: ")}{item.get("Цена")}\n' \

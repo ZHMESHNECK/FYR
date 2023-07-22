@@ -15,17 +15,10 @@ async def check_register(message: types.Message):
         await db.set_bind(POSTGRES_URI)
         user = await select_user(message.from_user.id)
         if not user:
-            await message.answer('У вас ещё не заданных параметров\nдавайте пройдём маленькую регистрацию ☺️', reply_markup=city_key)
+            await message.answer('У вас ещё нет заданных параметров\nдавайте пройдём маленькую регистрацию ☺️', reply_markup=city_key)
             await start_reg(message)
         else:
-            await message.answer(f'🛠 Параметры 🛠:\n'
-                                 f'\n<b>Город</b> - {user.city if user.city is not None else "Не указано"}\n'
-                                 f'\n<b>Мин. цена</b> - {str(user.min_price) + " грн" if user.min_price is not None else "Не указано"}\n'
-                                 f'\n<b>Макс. цена</b> - {str(user.max_price) + " грн" if user.max_price is not None else "Не указано"}\n'
-                                 f'\n<b>Кол. комнат</b> - {user.count_rooms if user.count_rooms is not None else "Не указано"}\n'
-                                 f'\n<b>Мин. этаж</b> - {user.min_floor if user.min_floor is not None else "Не указано"}\n'
-                                 f'\n<b>Макс. этаж</b> - {user.max_floor if user.max_floor is not None else "Не указано"}\n'
-                                 f'\n<b>Сортировка</b> - {user.sort if user.sort is not None else "Не указано"}\n', reply_markup=view_param)
+            return user
     except:
         await message.answer('Не удалось подключиться к базе данных', traceback.format_exc())
 
@@ -33,6 +26,17 @@ async def check_register(message: types.Message):
 async def start_reg(message: types.Message):
     await message.answer('Для начала введите город в котором искать', reply_markup=city_key)
     await registration.city.set()
+
+
+async def show_parametrs(message: types.Message, user):
+    await message.answer(f'🛠 Параметры 🛠:\n'
+                         f'\n<b>Город</b> - {user.city if user.city is not None else "Не указано"}\n'
+                         f'\n<b>Мин. цена</b> - {str(user.min_price) + " грн" if user.min_price is not None else "Не указано"}\n'
+                         f'\n<b>Макс. цена</b> - {str(user.max_price) + " грн" if user.max_price is not None else "Не указано"}\n'
+                         f'\n<b>Кол. комнат</b> - {user.count_rooms if user.count_rooms is not None else "Не указано"}\n'
+                         f'\n<b>Мин. этаж</b> - {user.min_floor if user.min_floor is not None else "Не указано"}\n'
+                         f'\n<b>Макс. этаж</b> - {user.max_floor if user.max_floor is not None else "Не указано"}\n'
+                         f'\n<b>Сортировка</b> - {user.sort if user.sort is not None else "Не указано"}\n', reply_markup=view_param)
 
 
 @dp.message_handler(state=temp_reg.choice_param)
@@ -112,17 +116,12 @@ async def single_change_2(message: types.Message, state: FSMContext):
 @dp.message_handler(state=registration.city)
 async def get_city(message: types.Message, state: FSMContext):
 
-    if message.text == 'Пропуск':
-        await state.update_data(city=None)
-        await message.answer(f'Окей, буду искать в городе по умолчанию.\nУкажите пожалуйста, <b>от</b> какой суммы искать', reply_markup=price_n_key)
+    if check_city(message.text):
+        await state.update_data(city=message.text)
+        await message.answer(f'Принял, буду искать в городе <b>{message.text}</b>.\nУкажите <b>от</b> какой суммы искать', reply_markup=price_n_key)
         await registration.min_price.set()
     else:
-        if check_city(message.text):
-            await state.update_data(city=message.text)
-            await message.answer(f'Принял, буду искать в городе <b>{message.text}</b>.\nУкажите <b>от</b> какой суммы искать', reply_markup=price_n_key)
-            await registration.min_price.set()
-        else:
-            await message.answer('Не удалось распознать город для поиска.\nИспользуйте доступные города предложенные на клавиатуре 👇')
+        await message.answer('Не удалось распознать город для поиска.\nИспользуйте доступные города предложенные на клавиатуре 👇')
 
 
 @dp.message_handler(state=registration.min_price)
