@@ -2,10 +2,10 @@ from utils.db.schemas.temporary_storage import registration, temp_reg
 from aiogram.dispatcher import FSMContext
 from utils.db.reg_commands import *
 from config import POSTGRES_URI
+from utils.keyboards import *
 from utils.db.dbb import db
 from aiogram import types
 from utils.check import *
-from utils.keyboards import *
 from config import dp
 import traceback
 

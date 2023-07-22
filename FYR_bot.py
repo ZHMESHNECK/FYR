@@ -13,6 +13,11 @@ from config import dp
 async def start(message: types.Message):
     await message.answer('Приветствую!\nначать поиск?', reply_markup=keyboard)
 
+@dp.message_handler(commands='help')
+async def help(message: types.Message):
+    await message.answer_photo()
+    pass
+
 
 @dp.message_handler(Text(equals='🛠 параметры 🛠'))
 async def settings(message: types.Message):

@@ -12,7 +12,7 @@ import time
 
 
 async def call_data_olx(message: types.Message, user_param):
-    data_olx = await call_data_olx_2(message, user_param)
+    data_olx = await call_data_olx_2(user_param)
     if data_olx == 'Old version':
         for num, _ in enumerate(range(2), 2):
             if data_olx == 'Old version':
