@@ -33,7 +33,7 @@ async def call_data_rieltor(message: types.Message, user_param):
 
     gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}'
 
-    url = f'https://rieltor.ua/{parametrs["city"]}/flats-rent/{gen_of_link}'
+    url = f'https://rieltor.ua/{parametrs["city"]}/flats-rent/?{gen_of_link}'
 
     data_rieltor = []
 

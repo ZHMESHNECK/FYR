@@ -1,17 +1,12 @@
 from utils.db.registration import check_register, show_parametrs
-from states.temporary_storage import temp_reg
+from utils.db.schemas.temporary_storage import temp_reg
+from utils.rieltor_par import call_data_rieltor
+from utils.country_par import call_data_country
 from aiogram.dispatcher.filters import Text
-from rieltor_par import call_data_rieltor
-from country_par import call_data_country
+from utils.olx_par import call_data_olx
 from aiogram import types, executor
-from olx_par import call_data_olx
-from keyboards import *
-from time import sleep
+from utils.keyboards import *
 from config import dp
-
-# https://www.youtube.com/watch?v=dcbuQMjHj_c&t=240s
-# https://www.youtube.com/watch?v=rgmehqKzWO0
-# https://pythonru.com/biblioteki/shemy-v-sqlalchemy-orm
 
 
 @dp.message_handler(commands='start')
@@ -33,15 +28,15 @@ async def search(message: types.Message):
     user_param = await check_register(message)
     if user_param is not None:
 
-        # await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
+        await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
 
-        # # запуск функции для RIELTOR
-        # await call_data_rieltor(message, user_param)
+        # запуск функции для RIELTOR
+        await call_data_rieltor(message, user_param)
 
-        # await message.answer('Начинаю поиск на 📦 OLX 📦')
+        await message.answer('Начинаю поиск на 📦 OLX 📦')
 
-        # # запуск функции для OLX
-        # await call_data_olx(message, user_param)
+        # запуск функции для OLX
+        await call_data_olx(message, user_param)
 
         await message.answer('Начинаю поиск на 🏠 country 🏠')
 

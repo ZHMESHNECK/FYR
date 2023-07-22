@@ -1,11 +1,11 @@
-from states.temporary_storage import registration, temp_reg
+from utils.db.schemas.temporary_storage import registration, temp_reg
 from aiogram.dispatcher import FSMContext
 from utils.db.reg_commands import *
 from config import POSTGRES_URI
 from utils.db.dbb import db
 from aiogram import types
 from utils.check import *
-from keyboards import *
+from utils.keyboards import *
 from config import dp
 import traceback
 
@@ -54,7 +54,9 @@ async def single_change(message: types.Message, state: FSMContext):
               'sort': [user.sort, sort_key]}
     param = data.get(message.text)
 
-    if param:
+    if message.text == 'Отмена':
+        await message.answer('Отменено',reply_markup=keyboard)
+    elif param:
         await message.answer(f'Меняем {message.text} - <b>{data_2[param][0]}</b> на:', reply_markup=data_2[param][1])
         await state.update_data(choice_param=param)
         await temp_reg.param.set()
@@ -73,13 +75,13 @@ async def single_change_2(message: types.Message, state: FSMContext):
                 return
         elif data['choice_param'] == 'min_price':
             if check_num(data['param']):
-                await update_user_n_p(message.from_user.id, data['param'])
+                await update_user_n_p(message.from_user.id, int("".join(data['param'].replace('.',''))))
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_n_key)
                 return
         elif data['choice_param'] == 'max_price':
             if check_num(data['param']):
-                await update_user_x_p(message.from_user.id, data['param'])
+                await update_user_x_p(message.from_user.id, int("".join(data['param'].replace('.',''))))
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_x_key)
                 return
@@ -108,9 +110,11 @@ async def single_change_2(message: types.Message, state: FSMContext):
                 await message.answer('Не удалось распознать сортировку', reply_markup=sort_key)
                 return
     except:
-        await message.answer('При обновлении данных произошла ошибка')
-    await state.finish()
+        await message.answer('При обновлении данных произошла ошибка',traceback.format_exc())
+        await state.finish()
+        return
     await message.answer('✅ Успешно обновлено! ✅', reply_markup=keyboard)
+    await state.finish()
 
 
 @dp.message_handler(state=registration.city)
