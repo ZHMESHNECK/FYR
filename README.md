@@ -1,5 +1,8 @@
 # FYR
 
+version 1.6.6
+- Полностью рабочие варианты с rieltor, country
+
 version 1.6.5
 - Параметры ссылки для rieltor, country
 - Полностью рабочий вариант с olx
