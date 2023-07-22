@@ -1,85 +1,10 @@
+from config import city, rielt_room, rielt_rooms, sort
 from aiogram.utils.markdown import hbold, hlink
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 from aiogram import types
-from config import city
 import requests
 import time
-
-# заготовка под генерацию ссылки с параметрами
-"""
-from bs4 import BeautifulSoup
-with open('rieltor.html', 'r', encoding='utf-8') as file:
-    src = file.read()
-
-soup = BeautifulSoup(src, 'lxml')
-
-
-room = ['1-room', '2-rooms', '3-rooms', '4-rooms']
-rooms = ['rooms[0]=1', 'rooms[1]=2', 'rooms[2]=3']
-city = [i.attrs['data-index-url']
-        for i in soup.find_all('div', class_='nav_item_option_geo_city js_nav_input')]  # взять города из config
-sorti = ['bycreated', 'byprice', '-byprice']
-
-parametrs = {
-    'rooms': '',
-    'price_min': '',
-    'price_max': '',
-    'city': city[0],
-    'floor_min': '',
-    'floor_max': '',
-    'sort': ''
-}
-
-roomes = []
-c_room = int(input('Кол. комнат: '))
-while c_room != 0:
-    roomes.append(c_room)
-    c_room = int(input('Кол. комнат: '))
-roomes = list(set(roomes))
-mn_price = int(input('Мин: '))
-mx_price = int(input('Мах: '))
-mn_floor = int(input('ЭМин: '))
-mx_floor = int(input('Эmax: '))
-sort = int(input(
-    '0-без сорт\n1-найновіші\n2-найдешевші\n3-найдорожчі\n'))
-
-if len(roomes) == 1:
-    parametrs['rooms'] = room[roomes[0]-1] + '/?'
-elif len(roomes) > 1:
-    list_of_room = []
-    for i in roomes:
-        list_of_room.append(rooms[i-1])
-
-    parametrs['rooms'] = '?' + '&'.join(list_of_room) + '&'
-
-if mn_price != 0:
-    parametrs['price_min'] = f'&price_min={mn_price}'
-if mx_price != 0:
-    parametrs['price_max'] = f'&price_max={mx_price}'
-
-if mn_floor != 0:
-    parametrs['floor_min'] = f'&floor_min={mn_floor}'
-if mx_floor != 0:
-    parametrs['floor_max'] = f'&floor_max={mx_floor}'
-
-if sort != 0:
-    parametrs['sort'] = f'&sort={sorti[sort-1]}'
-
-gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}'
-
-
-link = f'https://rieltor.ua{parametrs["city"]}flats-rent/?{gen_of_link}'
-
-print('https://rieltor.ua/kiev/flats-rent/')
-print('https://rieltor.ua/kiev/flats-rent/2-rooms/?price_min=4000&price_max=9000&sort=byprice')
-print(link)
-
-print(
-    'https://rieltor.ua/kiev/flats-rent/?rooms[0]=1&rooms[1]=2&price_min=4000&price_max=9000&sort=byprice')
-print(
-    'https://rieltor.ua/rovno/flats-rent/?price_min=4000&price_max=9000&sort=-default&floor_min=6&floor_max=9&rooms[0]=1&rooms[1]=2')
-"""
 
 
 async def call_data_rieltor(message: types.Message, user_param):
@@ -87,16 +12,28 @@ async def call_data_rieltor(message: types.Message, user_param):
     ua = UserAgent()
 
     parametrs = {
-        'rooms': user_param.count_rooms,
-        'price_min': user_param.min_price,
-        'price_max': user_param.max_price,
+        'rooms': '',
+        'price_min': f'&price_min={user_param.min_price}' if user_param.min_price is not None else "",
+        'price_max': f'&price_max={user_param.max_price}' if user_param.max_price is not None else "",
         'city': city[user_param.city][1],
-        'floor_min': user_param.min_floor,
-        'floor_max': user_param.max_floor,
-        'sort': user_param.sort
+        'floor_min': f'&floor_min={user_param.min_floor}' if user_param.min_floor is not None else "",
+        'floor_max': f'&floor_max={user_param.max_floor}' if user_param.max_floor is not None else "",
+        'sort': f'&sort={sort[user_param.sort][1]}' if user_param.sort is not None else sort['Пропуск'][1]
     }
 
-    url = 'https://rieltor.ua/{}/flats-rent/{}'
+    count_rooms = list(map(int, user_param.count_rooms.replace(
+        '-', ''))) if user_param.count_rooms is not None else ""
+    if len(count_rooms) == 1:
+        parametrs['rooms'] = f'{rielt_room[int(user_param.count_rooms)-1]}/?'
+    elif len(count_rooms) > 1:
+        list_of_room = []
+        for i in count_rooms:
+            list_of_room.append(rielt_rooms[int(i)-1])
+        parametrs['rooms'] = '?' + '&'.join(list_of_room)
+
+    gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}'
+
+    url = f'https://rieltor.ua/{parametrs["city"]}/flats-rent/{gen_of_link}'
 
     data_rieltor = []
 

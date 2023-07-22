@@ -1,13 +1,13 @@
 from aiogram.utils.markdown import hbold, hlink
+from config import city, country_rooms, sort
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 from aiogram import types
-from config import city
 import requests
 import time
 
 
-## заготовка под генерацию ссылки с параметрами
+# заготовка под генерацию ссылки с параметрами
 
 '''room = ['1', '2', '3']
 rooms = {'1,2': '1%2C2', '1,3': '1%2C3', '2,3': '2%2C3', '1,2,3': '1%2C2%2C3'}
@@ -70,21 +70,31 @@ print(
     'https://www.country.ua/list/?action_id=2&action_url=rent&type_id=1&type_url=flat&rooms_id=1%2C2&rooms_url=1%2C2&filter_flat_type_id=1&filter_flat_type_url=flat&price_currency=uah&price_from=4000&price_to=9000&floor_from=2&floor_to=5&city_id=29595&lang=ua&price_sort=default')
 print(link)'''
 
+
 async def call_data_country(message: types.Message, user_param):
 
     ua = UserAgent()
 
     parametrs = {
-        'rooms': user_param.count_rooms,
-        'price_min': user_param.min_price,
-        'price_max': user_param.max_price,
-        'city': city[user_param.city][2],
-        'floor_min': user_param.min_floor,
-        'floor_max': user_param.max_floor,
-        'sort': user_param.sort
+        'rooms':  '',
+        'price_min': f'&price_from={user_param.min_price}' if user_param.min_price is not None else "",
+        'price_max': f'&price_to={user_param.max_price}' if user_param.max_price is not None else "",
+        'city': f'&city_id={city[user_param.city][2]}',
+        'floor_min': f'&floor_from={user_param.min_floor}' if user_param.min_floor is not None else "",
+        'floor_max': f'&floor_to={user_param.max_floor}' if user_param.max_floor is not None else "",
+        'sort': f'&price_sort={sort[user_param.sort][2]}' if user_param.sort is not None else f"&price_sort={sort['Пропуск'][2]}"
     }
 
-    url = 'https://www.country.ua/ua/rent/flat.html'
+    count_rooms = list(user_param.count_rooms.replace(
+        '-', '')) if user_param.count_rooms is not None else ""
+    if len(count_rooms) == 1:
+        parametrs['rooms'] = f'&rooms_id={user_param.count_rooms}&rooms_url={user_param.count_rooms}'
+    elif len(count_rooms) > 1:
+        parametrs['rooms'] = f'&rooms_id={country_rooms[",".join(count_rooms)]}&rooms_url={country_rooms[",".join(count_rooms)]}'
+
+    gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}{parametrs["city"]}'
+
+    url = f'https://www.country.ua/list/?action_id=2&action_url=rent&type_id=1&type_url=flat{gen_of_link}&filter_flat_type_id=1&filter_flat_type_url=flat&price_currency=uah'
 
     data_country = []
 
@@ -128,16 +138,16 @@ async def call_data_country(message: types.Message, user_param):
                     "Цена": price,
                     "Ссылка": 'https://www.country.ua'+link
                 })
-        
-        ## ответ с country
+
+        # ответ с country
         for index, item in enumerate(data_country):
             card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
-            f'{hbold("Цена: ")}{item.get("Цена")}\n'
-            
-            if index%10 == 0:
+                f'{hbold("Цена: ")}{item.get("Цена")}\n'
+
+            if index % 10 == 0:
                 time.sleep(3)
 
             await message.answer(card)
-        time.sleep(2)        
+        time.sleep(2)
     else:
         await message.answer('Не удалось соединиться с country.ua')

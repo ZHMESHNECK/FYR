@@ -38,15 +38,15 @@ async def search(message: types.Message):
         # # запуск функции для RIELTOR
         # await call_data_rieltor(message, user_param)
 
-        await message.answer('Начинаю поиск на 📦 OLX 📦')
+        # await message.answer('Начинаю поиск на 📦 OLX 📦')
 
-        # запуск функции для OLX
-        await call_data_olx(message, user_param)
+        # # запуск функции для OLX
+        # await call_data_olx(message, user_param)
 
-        # await message.answer('Начинаю поиск на 🏠 country 🏠')
+        await message.answer('Начинаю поиск на 🏠 country 🏠')
 
-        # # запуск функции для country
-        # await call_data_country(message, user_param)
+        # запуск функции для country
+        await call_data_country(message, user_param)
 
 
 @dp.message_handler(Text(equals='Изменить параметр'))
