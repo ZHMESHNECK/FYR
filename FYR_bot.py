@@ -7,16 +7,23 @@ from utils.olx_par import call_data_olx
 from aiogram import types, executor
 from utils.keyboards import *
 from config import dp
+import time
 
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
     await message.answer('Приветствую!\nначать поиск?', reply_markup=keyboard)
 
+
 @dp.message_handler(commands='help')
 async def help(message: types.Message):
-    await message.answer_photo()
-    pass
+    await message.answer_photo(open(r'media\screen\presentation.png', 'rb'), caption='Приветсвую, я твой помошник с поиском аренды жилья,\nя ищу объявления на rieltor.ua | olx.ua | country.ua\nдавай я расскажу тебе что я умею')
+    time.sleep(1)
+    await message.answer_photo(open(r'media\screen\registration.png', 'rb'), caption='Для начала тебе нужно пройти регистрацию, я тебе сам её предложу в самом начале.\nИспользуй подсказки на клавиатуре')
+    time.sleep(1)
+    await message.answer_photo(open(r'media\screen\af_registration.png', 'rb'), caption='После регистрации вам будет доступно 2 кнопки: "искать" - сразу начнёт поиск з заданныим параметрами')
+    time.sleep(1)
+    await message.answer_photo(open(r'media\screen\params.png', 'rb'), caption='При нажатии кнопки "параметры" вы увидите ваши сохраненные настройки,\nа также вы сможете изменить их нажав на "Изменить параметр" и следуя инструкциям')
 
 
 @dp.message_handler(Text(equals='🛠 параметры 🛠'))

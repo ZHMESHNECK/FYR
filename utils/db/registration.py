@@ -137,11 +137,12 @@ async def get_min_price(message: types.Message, state: FSMContext):
             await state.update_data(min_price=None)
             await registration.max_price.set()
         else:
-            if message.text.isnumeric():
-                if int(message.text) < 2000 or int(message.text) > 50000:
+            if check_num(message.text):
+                num = int("".join(message.text.replace('.','')))
+                if num < 2000 or num > 50000:
                     await message.answer('Ошибка\nЧисло выходит из допустимого диапазона')
                 else:
-                    await state.update_data(min_price=int(message.text))
+                    await state.update_data(min_price=num)
                     await message.answer(f'Принял, буду искать от <b>{message.text}</b> грн.\nУкажите <b>до</b> какой суммы искать', reply_markup=price_x_key)
                     await registration.max_price.set()
             else:
@@ -159,17 +160,18 @@ async def get_max_price(message: types.Message, state: FSMContext):
             await state.update_data(max_price=None)
             await registration.count_rooms.set()
         else:
-            if message.text.isnumeric():
-                if int(message.text) < 2000 and int(message.text) > 60000:
+            if check_num(message.text):
+                num = int("".join(message.text.replace('.','')))
+                if num < 2000 and num > 60000:
                     await message.answer('Ошибка\nЧисла выходит из допустимого диапазона')
                 else:
-                    await state.update_data(max_price=int(message.text))
+                    await state.update_data(max_price=num)
                     await message.answer(f'Принял, буду искать кваритиры до <b>{message.text}</b> грн.\nУкажите количество комнат', reply_markup=room_key)
                     await registration.count_rooms.set()
             else:
                 await message.answer('Ошибка\nВведенно не число')
     except Exception:
-        await message.answer('Ошибка\nВведены не корректные данные')
+        await message.answer('Ошибка\nВведены не корректные данные',traceback.format_exc())
 
 
 @dp.message_handler(state=registration.count_rooms)
