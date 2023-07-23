@@ -29,6 +29,7 @@ async def update_user_n_p(user_id, param):
     user = await select_user(user_id)
     await user.update(min_price=param).apply()
 
+
 async def update_user_x_p(user_id, param):
     user = await select_user(user_id)
     await user.update(max_price=param).apply()
@@ -52,3 +53,8 @@ async def update_user_x_f(user_id, param):
 async def update_user_s(user_id, param):
     user = await select_user(user_id)
     await user.update(sort=param).apply()
+
+
+async def update_time(user_id, param):
+    user = await select_user(user_id)
+    await user.update(time=param).apply()

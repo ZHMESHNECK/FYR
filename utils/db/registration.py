@@ -18,7 +18,11 @@ async def check_register(message: types.Message):
             await message.answer('У вас ещё нет заданных параметров\nдавайте пройдём маленькую регистрацию ☺️', reply_markup=city_key)
             await start_reg(message)
         else:
-            return user
+            if check_time(user.time):
+                await update_time(message.from_user.id, datetime.now()+timedelta(minutes=1))
+                return user
+            time = user.time - datetime.now()
+            return int(time.seconds)
     except:
         await message.answer('Не удалось подключиться к базе данных', traceback.format_exc())
 
@@ -55,7 +59,7 @@ async def single_change(message: types.Message, state: FSMContext):
     param = data.get(message.text)
 
     if message.text == 'Отмена':
-        await message.answer('Отменено',reply_markup=keyboard)
+        await message.answer('Отменено', reply_markup=keyboard)
         await state.update_data(choice_param=None)
         await state.finish()
     elif param:
@@ -77,13 +81,13 @@ async def single_change_2(message: types.Message, state: FSMContext):
                 return
         elif data['choice_param'] == 'min_price':
             if check_num(data['param']):
-                await update_user_n_p(message.from_user.id, int("".join(data['param'].replace('.',''))))
+                await update_user_n_p(message.from_user.id, int("".join(data['param'].replace('.', ''))))
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_n_key)
                 return
         elif data['choice_param'] == 'max_price':
             if check_num(data['param']):
-                await update_user_x_p(message.from_user.id, int("".join(data['param'].replace('.',''))))
+                await update_user_x_p(message.from_user.id, int("".join(data['param'].replace('.', ''))))
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_x_key)
                 return
@@ -112,7 +116,7 @@ async def single_change_2(message: types.Message, state: FSMContext):
                 await message.answer('Не удалось распознать сортировку', reply_markup=sort_key)
                 return
     except:
-        await message.answer('При обновлении данных произошла ошибка',traceback.format_exc())
+        await message.answer('При обновлении данных произошла ошибка', traceback.format_exc())
         await state.finish()
         return
     await message.answer('✅ Успешно обновлено! ✅', reply_markup=keyboard)
@@ -140,7 +144,7 @@ async def get_min_price(message: types.Message, state: FSMContext):
             await registration.max_price.set()
         else:
             if check_num(message.text):
-                num = int("".join(message.text.replace('.','')))
+                num = int("".join(message.text.replace('.', '')))
                 if num < 2000 or num > 50000:
                     await message.answer('Ошибка\nЧисло выходит из допустимого диапазона')
                 else:
@@ -163,7 +167,7 @@ async def get_max_price(message: types.Message, state: FSMContext):
             await registration.count_rooms.set()
         else:
             if check_num(message.text):
-                num = int("".join(message.text.replace('.','')))
+                num = int("".join(message.text.replace('.', '')))
                 if num < 2000 and num > 60000:
                     await message.answer('Ошибка\nЧисла выходит из допустимого диапазона')
                 else:
@@ -173,7 +177,7 @@ async def get_max_price(message: types.Message, state: FSMContext):
             else:
                 await message.answer('Ошибка\nВведенно не число')
     except Exception:
-        await message.answer('Ошибка\nВведены не корректные данные',traceback.format_exc())
+        await message.answer('Ошибка\nВведены не корректные данные', traceback.format_exc())
 
 
 @dp.message_handler(state=registration.count_rooms)

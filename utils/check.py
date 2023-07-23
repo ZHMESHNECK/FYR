@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 
 
 def check_c_room(param):
@@ -5,19 +6,30 @@ def check_c_room(param):
         return True
     return False
 
+
 def check_city(param):
-    if param in ('Киев','Одесса','Львов','Днепр','Харьков','Запорожье','Чернигов','Черкасы','Ужгород'):
+    if param in ('Киев', 'Одесса', 'Львов', 'Днепр', 'Харьков', 'Запорожье', 'Чернигов', 'Черкасы', 'Ужгород'):
         return True
     return False
+
 
 def check_sort(param):
     if param in ('Новинки', 'Дешёвые', 'Дорогие'):
         return True
     return False
 
+
 def check_num(param):
     try:
-        int("".join(param.replace('.','')))  # "10.000" -> 10000
+        int("".join(param.replace('.', '')))  # "10.000" -> 10000
         return True
     except:
         return False
+
+
+def check_time(param):
+    if param is not None:
+        if datetime.now() > param:
+            return True
+        return False
+    return True

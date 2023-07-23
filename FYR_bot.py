@@ -38,7 +38,9 @@ async def search(message: types.Message):
 
     # Достаём параметры из БД
     user_param = await check_register(message)
-    if user_param is not None:
+    if isinstance(user_param, int):
+        await message.answer(f'Запрос можно отправить только раз в минуту для предотвращения спама\nосталось <b>{user_param}</b> секунд')
+    elif user_param is not None:
 
         await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
 
