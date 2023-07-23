@@ -5,6 +5,17 @@ import environ
 env = environ.Env()
 env.read_env('.env')
 
+fake_user = ['Mozilla/5.0 (Macintosh; U; PPC Mac OS X; nl-nl) AppleWebKit/417.9 (KHTML, '
+             'like Gecko) Safari/417.8',
+             'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.10) Gecko/20050720 '
+             'Fedora/1.0.6-1.1.fc3 Firefox/1.0.6',
+             'Mozilla/5.0 (Windows; U; Windows NT 5.1; fr-FR; rv:1.7.6) Gecko/20050318 '
+             'Firefox/1.0.2',
+             'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/312.5.1 (KHTML, '
+             'like Gecko) Safari/312.3.1',
+             'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; fr-fr) AppleWebKit/312.5 (KHTML, '
+             'like Gecko) Safari/312.3']
+
 
 city = {
     'Киев': ['kiev', 'kiev', '29586'],
@@ -28,7 +39,8 @@ sort = {
 rielt_room = ['1-room', '2-rooms', '3-rooms']
 rielt_rooms = ['rooms[0]=1', 'rooms[1]=2', 'rooms[2]=3']
 
-country_rooms ={'1,2': '1%2C2', '1,3': '1%2C3', '2,3': '2%2C3', '1,2,3': '1%2C2%2C3'}
+country_rooms = {'1,2': '1%2C2', '1,3': '1%2C3',
+                 '2,3': '2%2C3', '1,2,3': '1%2C2%2C3'}
 
 host = env('POSTGRES_HOST')
 port = env('POSTGRES_PORT')

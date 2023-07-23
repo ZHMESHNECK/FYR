@@ -56,6 +56,8 @@ async def single_change(message: types.Message, state: FSMContext):
 
     if message.text == 'Отмена':
         await message.answer('Отменено',reply_markup=keyboard)
+        await state.update_data(choice_param=None)
+        await state.finish()
     elif param:
         await message.answer(f'Меняем {message.text} - <b>{data_2[param][0]}</b> на:', reply_markup=data_2[param][1])
         await state.update_data(choice_param=param)

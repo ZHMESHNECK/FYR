@@ -3,42 +3,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
 from aiogram.utils.markdown import hbold, hlink
 from selenium.webdriver.common.by import By
-from fake_useragent import UserAgent
 from selenium import webdriver
-from config import city, sort
+from config import city, sort, fake_user
 from bs4 import BeautifulSoup
 from aiogram import types
-import time
+from random import choice
 
 
 async def call_data_olx(message: types.Message, user_param):
-    data_olx = await call_data_olx_2(user_param)
-    if data_olx == 'Old version':
-        for num, _ in enumerate(range(2), 2):
-            if data_olx == 'Old version':
-                await message.answer(f'Попытка соединения с OLX №{num}')
-                time.sleep(5)
-                data_olx = await call_data_olx_2(user_param)
-    # ответ с olx
-    if isinstance(data_olx, list):
-        for index, item in enumerate(data_olx):
-            card = f'{hlink(item.get("Название"), item.get("Ссылка"))}\n' \
-                f'{hbold("Цена: ")}{item.get("Цена")}\n' \
-                f'{hbold("Район: ")}{item.get("Район")}'
 
-            if index % 10 == 0:
-                time.sleep(3)
-
-            await message.answer(card)
-    else:
-        await message.answer('Не удалось соединиться с OLX')
-
-
-async def call_data_olx_2(user_param):
-
-    ua = UserAgent()
     options = Options()
-    options.set_preference("general.useragent.override", f'{ua.random}')
+    options.set_preference("general.useragent.override",
+                           f'{choice(fake_user)}')
     options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
     options.add_argument('--headless')
 
@@ -66,9 +42,9 @@ async def call_data_olx_2(user_param):
         try:
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "c-wrapper-inside")))
-            return 'Old version'
+            check_ver = False
         except:
-            pass
+            check_ver = True
 
     except Exception as _ex:
         print(_ex)
@@ -82,30 +58,40 @@ async def call_data_olx_2(user_param):
         driver.quit()
 
     data_olx = []
-    for item in items_divs:
-        try:
-            price = item.find('p', class_='css-10b0gli er34gjf0').text
-        except:
-            price = 'No price'
-        try:
-            addres = item.find('div', class_="css-u2ayx9").find('h6').text
-        except:
-            addres = 'No address'
-        try:
-            link = item.find('a').get('href')
-        except:
-            link = 'no url'
-        try:
-            area = item.find('p', class_='css-veheph er34gjf0').text.split('-')
-        except:
-            area = 'No area'
+    if check_ver:
+        for item in items_divs:
+            try:
+                price = item.find('p', class_='css-10b0gli er34gjf0').text
+            except:
+                price = 'No price'
+            try:
+                addres = item.find('div', class_="css-u2ayx9").find('h6').text
+            except:
+                addres = 'No address'
+            try:
+                link = item.find('a').get('href')
+            except:
+                link = 'no url'
+            try:
+                area = item.find('p', class_='css-veheph er34gjf0').text.split('-')
+            except:
+                area = 'No area'
 
-        data_olx.append(
-            {
-                "Цена": price,
-                "Район": area[0],
-                "Название": addres,
-                "Ссылка": f'https://www.olx.ua{link}',
-            }
-        )
-    return data_olx
+            data_olx.append(
+                {
+                    "Цена": price,
+                    "Район": area[0],
+                    "Название": addres,
+                    "Ссылка": f'https://www.olx.ua{link}',
+                }
+            )
+        # ответ с olx
+        if isinstance(data_olx, list):
+            for item in data_olx:
+                card = f'{hlink(item.get("Название"), item.get("Ссылка"))}\n' \
+                    f'{hbold("Цена: ")}{item.get("Цена")}\n' \
+                    f'{hbold("Район: ")}{item.get("Район")}'
+
+                await message.answer(card)
+    else:
+        await message.answer('Не удалось соединиться с OLX')
