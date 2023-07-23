@@ -2,7 +2,9 @@ from utils.db.registration import check_register, show_parametrs
 from utils.db.schemas.temporary_storage import temp_reg
 from utils.rieltor_par import call_data_rieltor
 from utils.country_par import call_data_country
+from utils.db.reg_commands import update_time
 from aiogram.dispatcher.filters import Text
+from datetime import datetime, timedelta
 from utils.olx_par import call_data_olx
 from aiogram import types, executor
 from utils.keyboards import *
@@ -30,7 +32,7 @@ async def help(message: types.Message):
 async def settings(message: types.Message):
     user = await check_register(message)
     if user:
-        await show_parametrs(message, user)
+        await show_parametrs(message, user[0])
 
 
 @dp.message_handler(Text(equals='🔎 Искать 🔍'))
@@ -38,24 +40,28 @@ async def search(message: types.Message):
 
     # Достаём параметры из БД
     user_param = await check_register(message)
-    if isinstance(user_param, int):
-        await message.answer(f'Запрос можно отправить только раз в минуту для предотвращения спама\nосталось <b>{user_param}</b> секунд')
-    elif user_param is not None:
+
+    # user_param[0] - параметры пользователя
+    # user_param[1] - если есть бан то значение int иначе None
+    if isinstance(user_param[1], int):
+        await message.answer(f'Запрос можно отправить только раз в минуту для предотвращения спама\nосталось <b>{user_param[1]}</b> секунд')
+    elif user_param[0] is not None:
+        await update_time(message.from_user.id, datetime.now()+timedelta(minutes=1))
 
         await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
 
         # запуск функции для RIELTOR
-        await call_data_rieltor(message, user_param)
+        await call_data_rieltor(message, user_param[0])
 
         await message.answer('Начинаю поиск на 📦 OLX 📦')
 
         # запуск функции для OLX
-        await call_data_olx(message, user_param)
+        await call_data_olx(message, user_param[0])
 
         await message.answer('Начинаю поиск на 🏠 country 🏠')
 
         # запуск функции для country
-        await call_data_country(message, user_param)
+        await call_data_country(message, user_param[0])
 
 
 @dp.message_handler(Text(equals='Изменить параметр'))

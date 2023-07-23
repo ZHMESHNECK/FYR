@@ -19,10 +19,9 @@ async def check_register(message: types.Message):
             await start_reg(message)
         else:
             if check_time(user.time):
-                await update_time(message.from_user.id, datetime.now()+timedelta(minutes=1))
-                return user
+                return (user, None)
             time = user.time - datetime.now()
-            return int(time.seconds)
+            return (user, int(time.seconds))
     except:
         await message.answer('Не удалось подключиться к базе данных', traceback.format_exc())
 
@@ -74,43 +73,57 @@ async def single_change_2(message: types.Message, state: FSMContext):
     data = await state.get_data()
     try:
         if data['choice_param'] == 'city':
-            if check_city(data['param']):
+            if data['param'] == 'Пропуск':
+                await update_user_c(message.from_user.id, None)
+            elif check_city(data['param']):
                 await update_user_c(message.from_user.id, data['param'])
             else:
                 await message.answer('Не удалось распознать город для поиска.\nИспользуйте доступные города предложенные на клавиатуре 👇', reply_markup=city_key)
                 return
         elif data['choice_param'] == 'min_price':
-            if check_num(data['param']):
+            if data['param'] == 'Пропуск':
+                await update_user_n_p(message.from_user.id, None)
+            elif check_num(data['param']):
                 await update_user_n_p(message.from_user.id, int("".join(data['param'].replace('.', ''))))
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_n_key)
                 return
         elif data['choice_param'] == 'max_price':
-            if check_num(data['param']):
+            if data['param'] == 'Пропуск':
+                await update_user_x_p(message.from_user.id, None)
+            elif check_num(data['param']):
                 await update_user_x_p(message.from_user.id, int("".join(data['param'].replace('.', ''))))
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_x_key)
                 return
-        elif data['choice_param'] == 'count_room':
-            if check_c_room(data['param']):
+        elif data['choice_param'] == 'count_rooms':
+            if data['param'] == 'Пропуск':
+                await update_user_c_r(message.from_user.id, None)
+            elif check_c_room(data['param']):
                 await update_user_c_r(message.from_user.id, data['param'])
             else:
                 await message.answer('Не удалось распознать количество комнат', reply_markup=room_key)
                 return
         elif data['choice_param'] == 'min_floor':
-            if check_num(data['param']):
+            if data['param'] == 'Пропуск':
+                await update_user_n_f(message.from_user.id, None)
+            elif check_num(data['param']):
                 await update_user_n_f(message.from_user.id, data['param'])
             else:
                 await message.answer('Не удалось распознать число', reply_markup=floor_n_key)
                 return
         elif data['choice_param'] == 'max_floor':
-            if check_num(data['param']):
+            if data['param'] == 'Пропуск':
+                await update_user_x_f(message.from_user.id, None)
+            elif check_num(data['param']):
                 await update_user_x_f(message.from_user.id, data['param'])
             else:
                 await message.answer('Не удалось распознать число', reply_markup=floor_x_key)
                 return
         elif data['choice_param'] == 'sort':
-            if check_sort(data['param']):
+            if data['param'] == 'Пропуск':
+                await update_user_s(message.from_user.id, None)
+            elif check_sort(data['param']):
                 await update_user_s(message.from_user.id, data['param'])
             else:
                 await message.answer('Не удалось распознать сортировку', reply_markup=sort_key)
@@ -119,8 +132,9 @@ async def single_change_2(message: types.Message, state: FSMContext):
         await message.answer('При обновлении данных произошла ошибка', traceback.format_exc())
         await state.finish()
         return
+    finally:
+        await state.finish()
     await message.answer('✅ Успешно обновлено! ✅', reply_markup=keyboard)
-    await state.finish()
 
 
 @dp.message_handler(state=registration.city)

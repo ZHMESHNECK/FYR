@@ -69,6 +69,11 @@ POSTGRES_PASSWORD=PASSWORD
 
 ## Обновления
 
+version 1.7.4
+- В одиночном изменении параметра доработан пункт "Пропуск"
+- Исправлен баг с не показом объявлений на rieltor
+- Изменён return в функции `registration`
+
 version 1.7.3
 - Добавлен requirements.txt
 - Разработка README.md

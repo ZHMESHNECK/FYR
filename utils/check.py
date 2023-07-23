@@ -14,7 +14,7 @@ def check_city(param):
 
 
 def check_sort(param):
-    if param in ('Новинки', 'Дешёвые', 'Дорогие'):
+    if param in ('Новинки', 'Дешёвые', 'Дорогие', 'Пропуск'):
         return True
     return False
 

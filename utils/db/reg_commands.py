@@ -37,7 +37,7 @@ async def update_user_x_p(user_id, param):
 
 async def update_user_c_r(user_id, param):
     user = await select_user(user_id)
-    await user.update(count_room=param).apply()
+    await user.update(count_rooms=param).apply()
 
 
 async def update_user_n_f(user_id, param):
