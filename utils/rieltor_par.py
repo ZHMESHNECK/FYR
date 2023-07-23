@@ -41,14 +41,22 @@ async def call_data_rieltor(message: types.Message, user_param):
         url=url,
         headers={'user-agent': f'{ua.random}'},
     )
-    if response.status_code == 200:
+    try:
 
         soup = BeautifulSoup(response.text, 'lxml')
         mdiv = soup.find_all(class_='catalog-card')
+
         dublicate = []
 
-        # 8 объявлений
-        for div in mdiv[:8]:
+        if len(mdiv) == 0 or soup.find("div", class_='sort-wrap catalog-sort-wrap catalog-sort-wrap-pc').find('span').get_text() is not None:
+            await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
+            sps = []
+        elif len(mdiv) <= 8:
+            sps = mdiv
+        elif len(mdiv) > 8:  # 8 объявлений без рекламы
+            sps = mdiv[3:11]
+
+        for div in sps:
             try:
                 price = div.find(
                     'div', class_='catalog-card-price').text.strip()
@@ -74,22 +82,18 @@ async def call_data_rieltor(message: types.Message, user_param):
                         "Цена": price,
                         "Район": area,
                         "Адрес": addres,
-                        "Ссылка": link,
+                        "Ссылка": link
                     }
                 )
                 dublicate.append(addres)
-        if len(data_rieltor) >= 1:
-            for index, item in enumerate(data_rieltor):
-                card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
-                    f'{hbold("Цена: ")}{item.get("Цена")}\n' \
-                    f'{hbold("Район: ")}{item.get("Район")}'
 
-                if index % 10 == 0:
-                    time.sleep(3)
+        for item in data_rieltor:
+            card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
+                f'{hbold("Цена: ")}{item.get("Цена")}\n' \
+                f'{hbold("Район: ")}{item.get("Район")}'
 
-                await message.answer(card)
-        else:
-            await message.answer('Ничего не найдено за заданными параметрами')
+            await message.answer(card)
+
         time.sleep(2)
-    else:
+    except:
         await message.answer('Не удалось соединиться с rieltor.ua')

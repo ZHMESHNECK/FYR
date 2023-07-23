@@ -32,23 +32,27 @@ async def call_data_country(message: types.Message, user_param):
 
     url = f'https://www.country.ua/list/?action_id=2&action_url=rent&type_id=1&type_url=flat{gen_of_link}&filter_flat_type_id=1&filter_flat_type_url=flat&price_currency=uah'
 
-    data_country = []
-
     response = requests.get(
         url=url,
         headers={'user-agent': f'{ua.random}'},
     )
-    if response.status_code == 200:
 
+    try:
         soup = BeautifulSoup(response.text, 'lxml')
-
         mdiv = soup.find_all(
             class_='catalog__item item-catalog item-catalog_top')
 
         data_country = []
 
-        #  8 объявлений без рекламы
-        for div in mdiv[3:11]:
+        if len(mdiv) == 0 or soup.find(string='К сожалению, по вашему запросу ничего не найдено.') is not None:
+            await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
+            sps = []
+        elif len(mdiv) <= 8:
+            sps = mdiv
+        elif len(mdiv) > 8:  # 8 объявлений без рекламы
+            sps = mdiv[3:11]
+
+        for div in sps:
             try:
                 price = div.find('div', class_='item-catalog__price').text
             except:
@@ -64,6 +68,7 @@ async def call_data_country(message: types.Message, user_param):
                     'div', class_='item-catalog__text').find('a').get('href')
             except:
                 link = 'Ссылка не найдена'
+
             data_country.append(
                 {
                     "Адрес": addres.text.replace('\xa0', ''),
@@ -72,14 +77,11 @@ async def call_data_country(message: types.Message, user_param):
                 })
 
         # ответ с country
-        for index, item in enumerate(data_country):
+        for item in data_country:
             card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \
                 f'{hbold("Цена: ")}{item.get("Цена")}\n'
 
-            if index % 10 == 0:
-                time.sleep(3)
-
             await message.answer(card)
         time.sleep(2)
-    else:
+    except:
         await message.answer('Не удалось соединиться с country.ua')

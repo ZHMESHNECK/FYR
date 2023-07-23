@@ -3,8 +3,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
 from aiogram.utils.markdown import hbold, hlink
 from selenium.webdriver.common.by import By
-from selenium import webdriver
 from config import city, sort, fake_user
+from selenium import webdriver
 from bs4 import BeautifulSoup
 from aiogram import types
 from random import choice
@@ -38,13 +38,13 @@ async def call_data_olx(message: types.Message, user_param):
     try:
         driver.get(url=url)
 
-        # проверка браузера на совместимость с сайтом
-        try:
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "c-wrapper-inside")))
-            check_ver = False
-        except:
-            check_ver = True
+        # # проверка браузера на совместимость с сайтом
+        # try:
+        #     WebDriverWait(driver, 10).until(
+        #         EC.presence_of_element_located((By.CLASS_NAME, "c-wrapper-inside")))
+        #     check_ver = False
+        # except:
+        #     check_ver = True
 
     except Exception as _ex:
         print(_ex)
@@ -52,14 +52,24 @@ async def call_data_olx(message: types.Message, user_param):
         # ищем объявления
         soup = BeautifulSoup(driver.page_source, 'lxml')
 
-        # 8 объявлений без "рекламы"
-        items_divs = soup.find_all('div', class_='css-1sw7q4x')[3:11]
+        mdiv = soup.find_all('div', class_='css-1sw7q4x')
         driver.close()
         driver.quit()
 
+    if len(mdiv) == 0 or soup.find(string='Ми знайшли  0 оголошень') is not None:
+        await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
+        sps = []
+    elif len(mdiv) <= 8:
+        sps = mdiv
+
+    #  8 объявлений без рекламы
+    elif len(mdiv) > 8:
+        sps = mdiv[3:11]
+
     data_olx = []
-    if check_ver:
-        for item in items_divs:
+
+    try:
+        for item in sps:
             try:
                 price = item.find('p', class_='css-10b0gli er34gjf0').text
             except:
@@ -71,20 +81,23 @@ async def call_data_olx(message: types.Message, user_param):
             try:
                 link = item.find('a').get('href')
             except:
-                link = 'no url'
+                link = 'No url'
             try:
-                area = item.find('p', class_='css-veheph er34gjf0').text.split('-')
+                area = item.find(
+                    'p', class_='css-veheph er34gjf0').text.split('-')
             except:
                 area = 'No area'
 
-            data_olx.append(
-                {
-                    "Цена": price,
-                    "Район": area[0],
-                    "Название": addres,
-                    "Ссылка": f'https://www.olx.ua{link}',
-                }
-            )
+            if link != 'No url':
+                data_olx.append(
+                    {
+                        "Цена": price,
+                        "Район": area[0],
+                        "Название": addres,
+                        "Ссылка": f'https://www.olx.ua{link}',
+                    }
+                )
+
         # ответ с olx
         if isinstance(data_olx, list):
             for item in data_olx:
@@ -93,5 +106,5 @@ async def call_data_olx(message: types.Message, user_param):
                     f'{hbold("Район: ")}{item.get("Район")}'
 
                 await message.answer(card)
-    else:
+    except:
         await message.answer('Не удалось соединиться с OLX')
