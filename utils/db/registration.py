@@ -80,6 +80,7 @@ async def single_change_2(message: types.Message, state: FSMContext):
             else:
                 await message.answer('Не удалось распознать город для поиска.\nИспользуйте доступные города предложенные на клавиатуре 👇', reply_markup=city_key)
                 return
+            await state.finish()
         elif data['choice_param'] == 'min_price':
             if data['param'] == 'Пропуск':
                 await update_user_n_p(message.from_user.id, None)
@@ -88,14 +89,20 @@ async def single_change_2(message: types.Message, state: FSMContext):
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_n_key)
                 return
+            await state.finish()
         elif data['choice_param'] == 'max_price':
             if data['param'] == 'Пропуск':
                 await update_user_x_p(message.from_user.id, None)
             elif check_num(data['param']):
-                await update_user_x_p(message.from_user.id, int("".join(data['param'].replace('.', ''))))
+                if await update_user_x_p(message.from_user.id, int("".join(data['param'].replace('.', '')))):
+                    pass
+                else:
+                    await message.answer('Минимальное число не может быть больше максимального', reply_markup=price_x_key)
+                    return
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_x_key)
                 return
+            await state.finish()
         elif data['choice_param'] == 'count_rooms':
             if data['param'] == 'Пропуск':
                 await update_user_c_r(message.from_user.id, None)
@@ -104,22 +111,29 @@ async def single_change_2(message: types.Message, state: FSMContext):
             else:
                 await message.answer('Не удалось распознать количество комнат', reply_markup=room_key)
                 return
+            await state.finish()
         elif data['choice_param'] == 'min_floor':
             if data['param'] == 'Пропуск':
                 await update_user_n_f(message.from_user.id, None)
-            elif check_num(data['param']):
-                await update_user_n_f(message.from_user.id, data['param'])
+            elif check_num(data['param']) and check_floor(data['param']):
+                await update_user_n_f(message.from_user.id, int(data['param']))
             else:
                 await message.answer('Не удалось распознать число', reply_markup=floor_n_key)
                 return
+            await state.finish()
         elif data['choice_param'] == 'max_floor':
             if data['param'] == 'Пропуск':
                 await update_user_x_f(message.from_user.id, None)
-            elif check_num(data['param']):
-                await update_user_x_f(message.from_user.id, data['param'])
+            elif check_num(data['param']) and check_floor(data['param']):
+                if await update_user_x_f(message.from_user.id, int(data['param'])):
+                    pass
+                else:
+                    await message.answer('Минимальное число не может быть больше максимального', reply_markup=floor_x_key)
+                    return
             else:
                 await message.answer('Не удалось распознать число', reply_markup=floor_x_key)
                 return
+            await state.finish()
         elif data['choice_param'] == 'sort':
             if data['param'] == 'Пропуск':
                 await update_user_s(message.from_user.id, None)
@@ -128,12 +142,12 @@ async def single_change_2(message: types.Message, state: FSMContext):
             else:
                 await message.answer('Не удалось распознать сортировку', reply_markup=sort_key)
                 return
+            await state.finish()
     except:
         await message.answer('При обновлении данных произошла ошибка', traceback.format_exc())
         await state.finish()
         return
-    finally:
-        await state.finish()
+
     await message.answer('✅ Успешно обновлено! ✅', reply_markup=keyboard)
 
 
@@ -160,13 +174,13 @@ async def get_min_price(message: types.Message, state: FSMContext):
             if check_num(message.text):
                 num = int("".join(message.text.replace('.', '')))
                 if num < 2000 or num > 50000:
-                    await message.answer('Ошибка\nЧисло выходит из допустимого диапазона')
+                    await message.answer('Ошибка\nЧисло выходит из допустимого диапазона', reply_markup=price_n_key)
                 else:
                     await state.update_data(min_price=num)
                     await message.answer(f'Принял, буду искать от <b>{message.text}</b> грн.\nУкажите <b>до</b> какой суммы искать', reply_markup=price_x_key)
                     await registration.max_price.set()
             else:
-                await message.answer('Ошибка\nВведенно не число')
+                await message.answer('Ошибка\nВведенно не число', reply_markup=price_n_key)
     except Exception:
         await message.answer('Ошибка\nВведены не корректные данные')
 
@@ -183,13 +197,17 @@ async def get_max_price(message: types.Message, state: FSMContext):
             if check_num(message.text):
                 num = int("".join(message.text.replace('.', '')))
                 if num < 2000 and num > 60000:
-                    await message.answer('Ошибка\nЧисла выходит из допустимого диапазона')
+                    await message.answer('Ошибка\nЧисла выходит из допустимого диапазона', reply_markup=price_x_key)
                 else:
-                    await state.update_data(max_price=num)
-                    await message.answer(f'Принял, буду искать кваритиры до <b>{message.text}</b> грн.\nУкажите количество комнат', reply_markup=room_key)
-                    await registration.count_rooms.set()
+                    data = await state.get_data()
+                    if check_max_min(num, data.get('min_price')):
+                        await state.update_data(max_price=num)
+                        await message.answer(f'Принял, буду искать кваритиры до <b>{message.text}</b> грн.\nУкажите количество комнат', reply_markup=room_key)
+                        await registration.count_rooms.set()
+                    else:
+                        await message.answer('Минимальное число не может быть больше максимального', reply_markup=price_x_key)
             else:
-                await message.answer('Ошибка\nВведенно не число')
+                await message.answer('Ошибка\nВведенно не число', reply_markup=price_x_key)
     except Exception:
         await message.answer('Ошибка\nВведены не корректные данные', traceback.format_exc())
 
@@ -207,7 +225,7 @@ async def get_count_rooms(message: types.Message, state: FSMContext):
                 await message.answer(f'Принял, буду искать {message.text}-х комнатую квартиру\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную но не выше <b>20</b> этажа', reply_markup=floor_n_key)
                 await registration.min_floor.set()
             else:
-                await message.answer('не удалось распознать число')
+                await message.answer('не удалось распознать число', reply_markup=room_key)
     except:
         await message.answer('Произошла ошибка при вводе количества комнат')
 
@@ -221,7 +239,7 @@ async def get_min_floor(message: types.Message, state: FSMContext):
             await state.update_data(min_floor=None)
             await registration.max_floor.set()
         else:
-            if message.text.isnumeric() and int(message.text) <= 20:
+            if check_floor(message.text):
                 await state.update_data(min_floor=int(message.text))
                 await message.answer(f'Принял, буду искать с {message.text} этажа.\nУкажите <b>до</b> какого этажа искать квартиру', reply_markup=floor_x_key)
                 await registration.max_floor.set()
@@ -240,12 +258,16 @@ async def get_max_floor(message: types.Message, state: FSMContext):
             await state.update_data(max_floor=None)
             await registration.sort.set()
         else:
-            if message.text.isnumeric() and int(message.text) <= 20:
-                await state.update_data(max_floor=int(message.text))
-                await message.answer(f'Принял, буду искать до {message.text} этажа.\nУкажите сортировку объявлений', reply_markup=sort_key)
-                await registration.sort.set()
+            if check_floor(message.text):
+                data = await state.get_data()
+                if check_max_min(int(message.text), data.get('min_floor')):
+                    await state.update_data(max_floor=int(message.text))
+                    await message.answer(f'Принял, буду искать до {message.text} этажа.\nУкажите сортировку объявлений', reply_markup=sort_key)
+                    await registration.sort.set()
+                else:
+                    await message.answer('Минимальное число не может быть больше максимального', reply_markup=floor_x_key)
             else:
-                await message.answer('не удалось распознать этаж\nукажите этаж от 1 до 20 включительно')
+                await message.answer('не удалось распознать этаж\nукажите этаж от 1 до 20 включительно', reply_markup=floor_x_key)
     except:
         await message.answer('Произошла ошибка при вводе этажа')
 
@@ -262,14 +284,13 @@ async def get_sort(message: types.Message, state: FSMContext):
             await message.answer(f'Принял, буду искать по {message.text}', reply_markup=keyboard)
         else:
             await message.answer('Не удалось распознать вид сортировки.\nВыбирите из доступных вам', reply_markup=sort_key)
-            raise
-
+            return
         data = await state.get_data()
         if await add_user(message.from_user.id, data.get('city'), data.get('min_price'), data.get('max_price'), data.get('count_rooms'), data.get('min_floor'), data.get('max_floor'), data.get('sort')):
             await message.answer('✅ Вы успешно зарегистрировались ✅', reply_markup=keyboard)
+            await state.finish()
         else:
             await message.answer('Произошла ошибка при сохранении данных', reply_markup=keyboard)
-        await state.finish()
 
     except Exception:
         await message.answer('Произошла ошибка при вводе сортировки\n', traceback.format_exc())

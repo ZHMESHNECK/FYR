@@ -31,8 +31,8 @@ city = {
 
 sort = {
     'Новинки': ['created_at:desc', 'bycreated', 'date'],
-    'Дешёвые': ['asc', 'byprice', 'nedorogo'],
-    'Дорогие': ['desc', '-byprice', 'elit'],
+    'Дешёвые': ['filter_float_price:asc', 'byprice', 'nedorogo'],
+    'Дорогие': ['filter_float_price:desc', '-byprice', 'elit'],
     'Пропуск': ['', '', 'default']
 }
 

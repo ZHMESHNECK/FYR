@@ -1,13 +1,14 @@
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
 from aiogram.utils.markdown import hbold, hlink
-from selenium.webdriver.common.by import By
+# from selenium.webdriver.common.by import By
 from config import city, sort, fake_user
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from aiogram import types
 from random import choice
+import traceback
 
 
 async def call_data_olx(message: types.Message, user_param):
@@ -28,7 +29,7 @@ async def call_data_olx(message: types.Message, user_param):
         'city': city[user_param.city][0],
         'floor_min': f'&search[filter_float_floor:from]={user_param.min_floor}' if user_param.min_floor is not None else "",
         'floor_max': f'&search[filter_float_floor:to]={user_param.max_floor}' if user_param.max_floor is not None else "",
-        'sort': f'&search[order]=filter_float_price:{sort[user_param.sort][0]}' if user_param.sort is not None else sort['Пропуск'][0]
+        'sort': f'&search[order]={sort[user_param.sort][0]}' if user_param.sort is not None else sort['Пропуск'][0]
     }
     gen_of_link = f'{parametrs["rooms"]}{parametrs["price_min"]}{parametrs["price_max"]}{parametrs["floor_min"]}{parametrs["floor_max"]}{parametrs["sort"]}'
 
@@ -107,4 +108,4 @@ async def call_data_olx(message: types.Message, user_param):
 
                 await message.answer(card)
     except:
-        await message.answer('Не удалось соединиться с OLX')
+        await message.answer('Не удалось соединиться с OLX', traceback.format_exc())

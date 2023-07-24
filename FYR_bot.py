@@ -21,9 +21,9 @@ async def start(message: types.Message):
 async def help(message: types.Message):
     await message.answer_photo(open(r'media\screen\presentation.png', 'rb'), caption='Приветсвую, я твой помошник с поиском аренды жилья,\nя ищу объявления на rieltor.ua | olx.ua | country.ua\nдавай я расскажу тебе что я умею')
     time.sleep(1)
-    await message.answer_photo(open(r'media\screen\registration.png', 'rb'), caption='Для начала тебе нужно пройти регистрацию, я тебе сам её предложу в самом начале.\nИспользуй подсказки на клавиатуре')
+    await message.answer_photo(open(r'media\screen\registration.png', 'rb'), caption='Для начала тебе нужно пройти регистрацию, я тебе сам её предложу в самом начале.\nИспользуй подсказки на клавиатуре\nТакже большинство параметров можно не указывать, для этого, снизу клавиатуры есть кнопка "Пропуск"')
     time.sleep(1)
-    await message.answer_photo(open(r'media\screen\af_registration.png', 'rb'), caption='После регистрации вам будет доступно 2 кнопки: "искать" - сразу начнёт поиск з заданныим параметрами')
+    await message.answer_photo(open(r'media\screen\af_registration.png', 'rb'), caption='После регистрации вам будет доступно 2 кнопки: кнопка "искать" - сразу начнёт поиск з заданныим параметрами')
     time.sleep(1)
     await message.answer_photo(open(r'media\screen\params.png', 'rb'), caption='При нажатии кнопки "параметры" вы увидите ваши сохраненные настройки,\nа также вы сможете изменить их нажав на "Изменить параметр" и следуя инструкциям')
 
@@ -43,25 +43,26 @@ async def search(message: types.Message):
 
     # user_param[0] - параметры пользователя
     # user_param[1] - если есть бан то значение int иначе None
-    if isinstance(user_param[1], int):
-        await message.answer(f'Запрос можно отправить только раз в минуту для предотвращения спама\nосталось <b>{user_param[1]}</b> секунд')
-    elif user_param[0] is not None:
-        await update_time(message.from_user.id, datetime.now()+timedelta(minutes=1))
+    if user_param is not None:
+        if isinstance(user_param[1], int):
+            await message.answer(f'Запрос можно отправить только раз в минуту для предотвращения спама\nосталось <b>{user_param[1]}</b> секунд')
+        elif user_param[0] is not None:
+            await update_time(message.from_user.id, datetime.now()+timedelta(minutes=1))
 
-        await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
+            await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
 
-        # запуск функции для RIELTOR
-        await call_data_rieltor(message, user_param[0])
+            # запуск функции для RIELTOR
+            await call_data_rieltor(message, user_param[0])
 
-        await message.answer('Начинаю поиск на 📦 OLX 📦')
+            await message.answer('\nНачинаю поиск на 📦 OLX 📦\n')
 
-        # запуск функции для OLX
-        await call_data_olx(message, user_param[0])
+            # запуск функции для OLX
+            await call_data_olx(message, user_param[0])
 
-        await message.answer('Начинаю поиск на 🏠 country 🏠')
+            await message.answer('\nНачинаю поиск на 🏠 country 🏠\n')
 
-        # запуск функции для country
-        await call_data_country(message, user_param[0])
+            # запуск функции для country
+            await call_data_country(message, user_param[0])
 
 
 @dp.message_handler(Text(equals='Изменить параметр'))
