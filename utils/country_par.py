@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from aiogram import types
 import requests
 import time
+import traceback
 
 
 async def call_data_country(message: types.Message, user_param):
@@ -47,34 +48,42 @@ async def call_data_country(message: types.Message, user_param):
         if len(mdiv) == 0 or soup.find(string='К сожалению, по вашему запросу ничего не найдено.') is not None:
             await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
             sps = []
-        elif len(mdiv) <= 8:
+        else:
             sps = mdiv
-        elif len(mdiv) > 8:  # 8 объявлений без рекламы
-            sps = mdiv[3:11]
+        # elif len(mdiv) <= 8:
+        #     sps = mdiv
+        # elif len(mdiv) > 8:  # 8 объявлений без рекламы
+        #     sps = mdiv[3:11]
 
         for div in sps:
-            try:
-                price = div.find('div', class_='item-catalog__price').text
-            except:
-                price = 'Цена не найдена'
-            try:
-                addres = div.find(
-                    'div', class_='item-catalog__address address')
-            except:
-                addres = 'Адрес не найден'
+            # если это рекламное объявление, то пропускаем его
+            if not div.find('div', class_='item-catalog__label item-catalog__label_orange'):
+                try:
+                    price = div.find('div', class_='item-catalog__price').text
+                except:
+                    price = 'Цена не найдена'
+                try:
+                    addres = div.find(
+                        'div', class_='item-catalog__address address')
+                except:
+                    addres = 'Адрес не найден'
 
-            try:
-                link = div.find(
-                    'div', class_='item-catalog__text').find('a').get('href')
-            except:
-                link = 'Ссылка не найдена'
+                try:
+                    link = div.find(
+                        'div', class_='item-catalog__text').find('a').get('href')
+                except:
+                    link = 'Ссылка не найдена'
 
-            data_country.append(
-                {
-                    "Адрес": addres.text.replace('\xa0', ''),
-                    "Цена": price,
-                    "Ссылка": 'https://www.country.ua'+link
-                })
+                data_country.append(
+                    {
+                        "Адрес": addres.text.replace('\xa0', ''),
+                        "Цена": price,
+                        "Ссылка": 'https://www.country.ua'+link
+                    })
+
+                # если количество объявлений больше 8 - прерываем цикл
+                if len(data_country) == 8:
+                    break
 
         # ответ с country
         for item in data_country:
@@ -84,4 +93,4 @@ async def call_data_country(message: types.Message, user_param):
             await message.answer(card)
         time.sleep(2)
     except:
-        await message.answer('Не удалось соединиться с country.ua')
+        await message.answer('Не удалось соединиться с country.ua', traceback.format_exc())

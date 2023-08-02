@@ -1,6 +1,5 @@
-from sqlalchemy import Column, BigInteger, String, sql, Integer,DateTime
-from utils.db.dbb import BaseModel, db
-
+from sqlalchemy import Column, BigInteger, String, sql, Integer, DateTime
+from utils.db.dbb import BaseModel
 
 
 class User_model(BaseModel):
@@ -13,6 +12,6 @@ class User_model(BaseModel):
     min_floor = Column(Integer, nullable=True)
     max_floor = Column(Integer, nullable=True)
     sort = Column(String(25), nullable=True)
-    time = Column(DateTime(timezone=False), server_default=db.func.now())
+    time = Column(DateTime(timezone=False))
 
     query: sql.select()

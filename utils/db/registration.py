@@ -44,7 +44,6 @@ async def show_parametrs(message: types.Message, user):
 
 @dp.message_handler(state=temp_reg.choice_param)
 async def single_change(message: types.Message, state: FSMContext):
-    await db.set_bind(POSTGRES_URI)
     user = await select_user(message.from_user.id)
     data = {'Город': 'city', 'Кол. комнат': 'count_rooms',
             'Мин. цена': 'min_price', 'Макс. цена': 'max_price', 'Мин. этаж': 'min_floor', 'Макс. этаж': 'max_floor', 'Сортировка': 'sort'}
@@ -85,7 +84,10 @@ async def single_change_2(message: types.Message, state: FSMContext):
             if data['param'] == 'Пропуск':
                 await update_user_n_p(message.from_user.id, None)
             elif check_num(data['param']):
-                await update_user_n_p(message.from_user.id, int("".join(data['param'].replace('.', ''))))
+                if await update_user_n_p(message.from_user.id, int("".join(data['param'].replace('.', '')))):
+                    pass
+                else:
+                    await message.answer('Минимальное число не может быть больше максимального', reply_markup=price_x_key)
             else:
                 await message.answer('Не удалось распознать число', reply_markup=price_n_key)
                 return
@@ -116,7 +118,11 @@ async def single_change_2(message: types.Message, state: FSMContext):
             if data['param'] == 'Пропуск':
                 await update_user_n_f(message.from_user.id, None)
             elif check_num(data['param']) and check_floor(data['param']):
-                await update_user_n_f(message.from_user.id, int(data['param']))
+                if await update_user_n_f(message.from_user.id, int(data['param'])):
+                    pass
+                else:
+                    await message.answer('Минимальное число не может быть больше максимального', reply_markup=floor_x_key)
+                    return
             else:
                 await message.answer('Не удалось распознать число', reply_markup=floor_n_key)
                 return

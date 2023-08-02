@@ -28,7 +28,10 @@ async def update_user_c(user_id, param):
 # min_price
 async def update_user_n_p(user_id, param):
     user = await select_user(user_id)
-    await user.update(min_price=param).apply()
+    if check_max_min(user.max_price,param):
+        await user.update(min_price=param).apply()
+        return True
+    return False
 
 # max_price
 async def update_user_x_p(user_id, param):

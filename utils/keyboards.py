@@ -28,6 +28,9 @@ view_param = ReplyKeyboardMarkup(
             KeyboardButton(text='🔎 Искать 🔍')
         ],
         [
+            KeyboardButton(text='🛠 параметры 🛠')
+        ],
+        [
             KeyboardButton(text='Изменить параметр')
         ]
     ],

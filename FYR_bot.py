@@ -12,6 +12,10 @@ from config import dp
 import time
 
 
+# OSError: [WinError 64] Указанное сетевое имя более недоступно
+# asyncpg.exceptions.ConnectionDoesNotExistError: connection was closed in the middle of operation
+# aiogram.utils.exceptions.BadRequest: Unsupported parse_mode
+
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
     await message.answer('Приветствую!\nначать поиск?', reply_markup=keyboard)
@@ -49,17 +53,17 @@ async def search(message: types.Message):
         elif user_param[0] is not None:
             await update_time(message.from_user.id, datetime.now()+timedelta(minutes=1))
 
-            await message.answer('Начинаю поиск на 🔑 Rieltor 🔑')
+            # await message.answer('Начинаю поиск на 🔑 Rieltor 🔑\n⬇️')
 
             # запуск функции для RIELTOR
-            await call_data_rieltor(message, user_param[0])
+            # await call_data_rieltor(message, user_param[0])
 
-            await message.answer('\nНачинаю поиск на 📦 OLX 📦\n')
+            # await message.answer('Начинаю поиск на 📦 OLX 📦\n⬇️')
 
             # запуск функции для OLX
-            await call_data_olx(message, user_param[0])
+            # await call_data_olx(message, user_param[0])
 
-            await message.answer('\nНачинаю поиск на 🏠 country 🏠\n')
+            await message.answer('Начинаю поиск на 🏠 country 🏠\n⬇️')
 
             # запуск функции для country
             await call_data_country(message, user_param[0])

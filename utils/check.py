@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-
+from datetime import datetime
 
 def check_c_room(param):
     if param in ('1', '2', '3', '1-2', '1-3', '2-3'):
