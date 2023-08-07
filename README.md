@@ -74,14 +74,14 @@ POSTGRES_PASSWORD=PASSWORD
 
 ## Спасибо
 - [vladfraer1](https://t.me/vladfraer1) ( тест )
-- [Itkitko](https://t.me/Itkitko) (тест)
-- [TOMAS](https://www.instagram.com/liondteach/) ( тест )
+- [Itkitko](https://t.me/Itkitko) ( тест )
+- [TOMAS](https://t.me/Teuieieie) ( тест )
 
 ## Обновления
 
 version 1.7.7
 - РЕЛИЗ
-- Обновлено подключение к БД ( тест )
+- Обновлено подключение к БД
 - убрана проверка на этаж ( <=20 )
 - Улучшен механизм обхода рекламы в olx, rieltor
 
