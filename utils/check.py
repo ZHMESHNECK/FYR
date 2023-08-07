@@ -40,9 +40,3 @@ def check_max_min(max_c, min_c):
             return True
         return False
     return True
-
-
-def check_floor(param):
-    if param.isnumeric() and int(param) <= 20:
-        return True
-    return False

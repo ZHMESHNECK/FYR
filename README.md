@@ -72,7 +72,18 @@ POSTGRES_PASSWORD=PASSWORD
 - https://www.youtube.com/@Redlyy
 - https://www.youtube.com/@PythonToday
 
+## Спасибо
+- [vladfraer1](https://t.me/vladfraer1) ( тест )
+- [Itkitko](https://t.me/Itkitko) (тест)
+- [TOMAS](https://www.instagram.com/liondteach/) ( тест )
+
 ## Обновления
+
+version 1.7.7
+- РЕЛИЗ
+- Обновлено подключение к БД ( тест )
+- убрана проверка на этаж ( <=20 )
+- Улучшен механизм обхода рекламы в olx, rieltor
 
 version 1.7.6
 - ПЕРЕХОДНОЕ ОБНОВЛЕНИЕ ( разрыв соединения с DB )

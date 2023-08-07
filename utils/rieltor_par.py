@@ -44,6 +44,8 @@ async def call_data_rieltor(message: types.Message, user_param):
     try:
 
         soup = BeautifulSoup(response.text, 'lxml')
+
+        # поиск всех объявлений
         mdiv = soup.find_all(class_='catalog-card')
 
         dublicate = []
@@ -51,10 +53,8 @@ async def call_data_rieltor(message: types.Message, user_param):
         if len(mdiv) == 0 or soup.find("div", class_='sort-wrap catalog-sort-wrap catalog-sort-wrap-pc').find('span').get_text().strip() == 'За вашим запитом пропозицій не знайдено':
             await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
             sps = []
-        elif len(mdiv) <= 8:
+        else:
             sps = mdiv
-        elif len(mdiv) > 8:  # 8 объявлений без рекламы
-            sps = mdiv[3:11]
 
         for div in sps:
             try:
@@ -86,6 +86,9 @@ async def call_data_rieltor(message: types.Message, user_param):
                     }
                 )
                 dublicate.append(addres)
+
+            if len(data_rieltor) == 8:
+                break
 
         for item in data_rieltor:
             card = f'{hlink(item.get("Адрес"), item.get("Ссылка"))}\n' \

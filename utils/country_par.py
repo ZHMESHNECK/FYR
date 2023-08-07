@@ -38,22 +38,21 @@ async def call_data_country(message: types.Message, user_param):
         headers={'user-agent': f'{ua.random}'},
     )
 
+    # список объявлений на отправку
+    data_country = []
+
     try:
         soup = BeautifulSoup(response.text, 'lxml')
+
+        # поиск всех объявлений
         mdiv = soup.find_all(
             class_='catalog__item item-catalog item-catalog_top')
-
-        data_country = []
 
         if len(mdiv) == 0 or soup.find(string='К сожалению, по вашему запросу ничего не найдено.') is not None:
             await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
             sps = []
         else:
             sps = mdiv
-        # elif len(mdiv) <= 8:
-        #     sps = mdiv
-        # elif len(mdiv) > 8:  # 8 объявлений без рекламы
-        #     sps = mdiv[3:11]
 
         for div in sps:
             # если это рекламное объявление, то пропускаем его

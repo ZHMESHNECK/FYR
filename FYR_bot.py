@@ -1,5 +1,5 @@
 from utils.db.registration import check_register, show_parametrs
-from utils.db.schemas.temporary_storage import temp_reg
+from utils.db.temporary_storage import temp_reg
 from utils.rieltor_par import call_data_rieltor
 from utils.country_par import call_data_country
 from utils.db.reg_commands import update_time
@@ -11,10 +11,6 @@ from utils.keyboards import *
 from config import dp
 import time
 
-
-# OSError: [WinError 64] Указанное сетевое имя более недоступно
-# asyncpg.exceptions.ConnectionDoesNotExistError: connection was closed in the middle of operation
-# aiogram.utils.exceptions.BadRequest: Unsupported parse_mode
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
@@ -46,22 +42,22 @@ async def search(message: types.Message):
     user_param = await check_register(message)
 
     # user_param[0] - параметры пользователя
-    # user_param[1] - если есть бан то значение int иначе None
+    # user_param[1] - если есть бан по временни, то значение int иначе None
     if user_param is not None:
         if isinstance(user_param[1], int):
             await message.answer(f'Запрос можно отправить только раз в минуту для предотвращения спама\nосталось <b>{user_param[1]}</b> секунд')
         elif user_param[0] is not None:
             await update_time(message.from_user.id, datetime.now()+timedelta(minutes=1))
 
-            # await message.answer('Начинаю поиск на 🔑 Rieltor 🔑\n⬇️')
+            await message.answer('Начинаю поиск на 🔑 Rieltor 🔑\n⬇️')
 
             # запуск функции для RIELTOR
-            # await call_data_rieltor(message, user_param[0])
+            await call_data_rieltor(message, user_param[0])
 
-            # await message.answer('Начинаю поиск на 📦 OLX 📦\n⬇️')
+            await message.answer('Начинаю поиск на 📦 OLX 📦\n⬇️')
 
             # запуск функции для OLX
-            # await call_data_olx(message, user_param[0])
+            await call_data_olx(message, user_param[0])
 
             await message.answer('Начинаю поиск на 🏠 country 🏠\n⬇️')
 

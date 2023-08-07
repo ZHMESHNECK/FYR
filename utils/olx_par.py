@@ -1,8 +1,5 @@
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
 from aiogram.utils.markdown import hbold, hlink
-# from selenium.webdriver.common.by import By
 from config import city, sort, fake_user
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -35,24 +32,21 @@ async def call_data_olx(message: types.Message, user_param):
 
     url = f'https://www.olx.ua/uk/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/{parametrs["city"]}/?{gen_of_link}'
 
+    # список объявлений на отправку
+    data_olx = []
+
     # Читаем страницу olx
     try:
         driver.get(url=url)
 
-        # # проверка браузера на совместимость с сайтом
-        # try:
-        #     WebDriverWait(driver, 10).until(
-        #         EC.presence_of_element_located((By.CLASS_NAME, "c-wrapper-inside")))
-        #     check_ver = False
-        # except:
-        #     check_ver = True
+    except Exception:
+        print(traceback.format_exc())
 
-    except Exception as _ex:
-        print(_ex)
     finally:
-        # ищем объявления
+
         soup = BeautifulSoup(driver.page_source, 'lxml')
 
+        # поиск всех объявлений
         mdiv = soup.find_all('div', class_='css-1sw7q4x')
         driver.close()
         driver.quit()
@@ -60,44 +54,45 @@ async def call_data_olx(message: types.Message, user_param):
     if len(mdiv) == 0 or soup.find(string='Ми знайшли  0 оголошень') is not None:
         await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
         sps = []
-    elif len(mdiv) <= 8:
+    else:
         sps = mdiv
 
-    #  8 объявлений без рекламы
-    elif len(mdiv) > 8:
-        sps = mdiv[3:11]
-
-    data_olx = []
-
     try:
-        for item in sps:
-            try:
-                price = item.find('p', class_='css-10b0gli er34gjf0').text
-            except:
-                price = 'No price'
-            try:
-                addres = item.find('div', class_="css-u2ayx9").find('h6').text
-            except:
-                addres = 'No address'
-            try:
-                link = item.find('a').get('href')
-            except:
-                link = 'No url'
-            try:
-                area = item.find(
-                    'p', class_='css-veheph er34gjf0').text.split('-')
-            except:
-                area = 'No area'
+        for div in sps:
+            # если это рекламное объявление, то пропускаем его
+            if not div.find('div', class_='css-1jh69qu'):
+                try:
+                    price = div.find('p', class_='css-10b0gli er34gjf0').text
+                except:
+                    price = 'No price'
+                try:
+                    addres = div.find(
+                        'div', class_="css-u2ayx9").find('h6').text
+                except:
+                    addres = 'No address'
+                try:
+                    link = div.find('a').get('href')
+                except:
+                    link = 'No url'
+                try:
+                    area = div.find(
+                        'p', class_='css-veheph er34gjf0').text.split('-')
+                except:
+                    area = 'No area'
 
-            if link != 'No url':
-                data_olx.append(
-                    {
-                        "Цена": price,
-                        "Район": area[0],
-                        "Название": addres,
-                        "Ссылка": f'https://www.olx.ua{link}',
-                    }
-                )
+                if link != 'No url':
+                    data_olx.append(
+                        {
+                            "Цена": price,
+                            "Район": area[0],
+                            "Название": addres,
+                            "Ссылка": f'https://www.olx.ua{link}',
+                        }
+                    )
+
+                # если количество объявлений больше 8 - прерываем цикл
+                if len(data_olx) == 8:
+                    break
 
         # ответ с olx
         if isinstance(data_olx, list):
