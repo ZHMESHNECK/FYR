@@ -5,15 +5,18 @@ services:
     env_file:
       - ./.env
     volumes:
-      -pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     restart: on-failure
     ports:
       - "5432:5432"
   bot:
     build: .
-    command: sh -c "make migrate && python -m main.py"
+    command: sh -c "python3 -m FYR_bot"
     env_file:
       - ./.env
     restart: always
     depends_on:
       - db
+
+volumes:
+  pgdata:
