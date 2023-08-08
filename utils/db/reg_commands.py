@@ -3,13 +3,20 @@ from asyncpg import UniqueViolationError
 from utils.check import check_max_min
 from config import POSTGRES_URI
 from utils.db.dbb import db
+from asyncpg.exceptions import UndefinedTableError
 
 
 # подключение и отключение связи с БД
 def open_db(func):
-    async def wrapper(*args,**kwargs):
-        async with db.with_bind(POSTGRES_URI):
-            return await func(*args)
+    async def wrapper(*args, **kwargs):
+        try:
+            async with db.with_bind(POSTGRES_URI):
+                return await func(*args)
+        # если таблицы не существует - создаём
+        except UndefinedTableError:
+            async with db.with_bind(POSTGRES_URI):
+                await db.gino.create_all()
+                return await func(*args)
     return wrapper
 
 @open_db
@@ -21,7 +28,6 @@ async def add_user(user_id: int, city: str or None, min_price: int or None, max_
         return True
     except UniqueViolationError:
         print('Юзер уже существует')
-
 
 
 @open_db
@@ -38,7 +44,7 @@ async def update_user_c(user_id, param):
 @open_db
 async def update_user_n_p(user_id, param):
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
-    if check_max_min(user.max_price,param):
+    if check_max_min(user.max_price, param):
         await user.update(min_price=param).apply()
         return True
     return False
@@ -62,7 +68,7 @@ async def update_user_c_r(user_id, param):
 @open_db
 async def update_user_n_f(user_id, param):
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
-    if check_max_min(user.max_floor,param):
+    if check_max_min(user.max_floor, param):
         await user.update(min_floor=param).apply()
         return True
     return False

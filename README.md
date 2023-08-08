@@ -71,6 +71,7 @@ POSTGRES_PASSWORD=PASSWORD
 ## Источники
 - https://www.youtube.com/@Redlyy
 - https://www.youtube.com/@PythonToday
+- https://www.youtube.com/@massonnn
 
 ## Спасибо
 - [vladfraer1](https://t.me/vladfraer1) ( тест )
@@ -78,6 +79,9 @@ POSTGRES_PASSWORD=PASSWORD
 - [TOMAS](https://t.me/Teuieieie) ( тест )
 
 ## Обновления
+
+version 1.7.9
+- Переходное обновление
 
 version 1.7.8
 - Добалены файлы для Docker
