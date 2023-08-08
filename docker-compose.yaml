@@ -1,0 +1,19 @@
+version: '2.17'
+services:
+  db:
+    image: postgres:15-alpine
+    env_file:
+      - ./.env
+    volumes:
+      -pgdata:/var/lib/postgresql/data
+    restart: on-failure
+    ports:
+      - "5432:5432"
+  bot:
+    build: .
+    command: sh -c "make migrate && python -m main.py"
+    env_file:
+      - ./.env
+    restart: always
+    depends_on:
+      - db
