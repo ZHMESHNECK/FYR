@@ -1,6 +1,7 @@
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram import Bot, Dispatcher, types
 import environ
+import os
 
 env = environ.Env()
 env.read_env('.env')
@@ -42,6 +43,8 @@ rielt_rooms = ['rooms[0]=1', 'rooms[1]=2', 'rooms[2]=3']
 country_rooms = {'1,2': '1%2C2', '1,3': '1%2C3',
                  '2,3': '2%2C3', '1,2,3': '1%2C2%2C3'}
 
+
+da = os.getenv('POSTGRES_HOST')
 host = env('POSTGRES_HOST')
 port = env('POSTGRES_PORT')
 db = env('POSTGRES_DB')

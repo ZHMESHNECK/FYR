@@ -1,9 +1,9 @@
 from asyncpg.exceptions import UndefinedTableError
-from utils.db.schemas.reg_model import User_model
+from db.schemas.reg_model import User_model
 from asyncpg import UniqueViolationError
-from utils.check import check_max_min
+from commands.check import check_max_min
 from config import POSTGRES_URI
-from utils.db.dbb import db
+from db.schemas.dbb import db
 
 
 # подключение и отключение связи с БД

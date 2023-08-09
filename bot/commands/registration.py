@@ -1,9 +1,9 @@
-from utils.db.temporary_storage import registration, temp_reg
+from db.temporary_storage import registration, temp_reg
 from aiogram.dispatcher import FSMContext
-from utils.db.reg_commands import *
+from commands.reg_commands import *
 from utils.keyboards import *
+from commands.check import *
 from aiogram import types
-from utils.check import *
 from config import dp
 import traceback
 
@@ -212,13 +212,13 @@ async def get_max_price(message: types.Message, state: FSMContext):
 async def get_count_rooms(message: types.Message, state: FSMContext):
     try:
         if message.text == 'Пропуск':
-            await message.answer('Окей, количество комнат не важно.\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную но не выше <b>20</b> этажа', reply_markup=floor_n_key)
+            await message.answer('Окей, количество комнат не важно.\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную', reply_markup=floor_n_key)
             await state.update_data(count_rooms=None)
             await registration.min_floor.set()
         else:
             if check_c_room(message.text):
                 await state.update_data(count_rooms=message.text)
-                await message.answer(f'Принял, буду искать {message.text}-х комнатую квартиру\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную но не выше <b>20</b> этажа', reply_markup=floor_n_key)
+                await message.answer(f'Принял, буду искать {message.text}-х комнатую квартиру\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную', reply_markup=floor_n_key)
                 await registration.min_floor.set()
             else:
                 await message.answer('не удалось распознать число', reply_markup=room_key)

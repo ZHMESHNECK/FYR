@@ -5,3 +5,6 @@ __pycache__
 data.json
 main.py
 README.md
+alembic.ini
+geckodriver.log
+migrations

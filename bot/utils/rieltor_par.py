@@ -1,15 +1,15 @@
-from config import city, rielt_room, rielt_rooms, sort
+from config import city, rielt_room, rielt_rooms, sort, fake_user
 from aiogram.utils.markdown import hbold, hlink
-from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 from aiogram import types
+from random import choice
 import requests
 import time
 
 
 async def call_data_rieltor(message: types.Message, user_param):
 
-    ua = UserAgent()
+    ua = choice(fake_user)
 
     parametrs = {
         'rooms': '',
@@ -39,7 +39,7 @@ async def call_data_rieltor(message: types.Message, user_param):
 
     response = requests.get(
         url=url,
-        headers={'user-agent': f'{ua.random}'},
+        headers={'user-agent': ua},
     )
     try:
 

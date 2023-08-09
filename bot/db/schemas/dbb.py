@@ -1,6 +1,6 @@
+from typing import List
 from gino import Gino
 import sqlalchemy as sa
-from typing import List
 
 db = Gino()
 

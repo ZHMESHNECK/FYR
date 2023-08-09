@@ -1,16 +1,16 @@
 from aiogram.utils.markdown import hbold, hlink
-from config import city, country_rooms, sort
-from fake_useragent import UserAgent
+from config import city, country_rooms, sort, fake_user
 from bs4 import BeautifulSoup
+from random import choice
 from aiogram import types
+import traceback
 import requests
 import time
-import traceback
 
 
 async def call_data_country(message: types.Message, user_param):
 
-    ua = UserAgent()
+    ua = choice(fake_user)
 
     parametrs = {
         'rooms':  '',
@@ -35,7 +35,7 @@ async def call_data_country(message: types.Message, user_param):
 
     response = requests.get(
         url=url,
-        headers={'user-agent': f'{ua.random}'},
+        headers={'user-agent': ua},
     )
 
     # список объявлений на отправку

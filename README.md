@@ -80,6 +80,11 @@ POSTGRES_PASSWORD=PASSWORD
 
 ## Обновления
 
+version 1.8.0
+- Изменена архитектура проекта
+- Добавлен alembic ( миграции )
+- Убран fake-useragent
+
 version 1.7.9
 - Переходное обновление
 

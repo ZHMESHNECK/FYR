@@ -1,16 +1,15 @@
-from utils.db.registration import check_register, show_parametrs
-from utils.db.temporary_storage import temp_reg
+from commands.registration import check_register, show_parametrs
 from utils.rieltor_par import call_data_rieltor
 from utils.country_par import call_data_country
-from utils.db.reg_commands import update_time
+from commands.reg_commands import update_time
 from aiogram.dispatcher.filters import Text
+from db.temporary_storage import temp_reg
 from datetime import datetime, timedelta
 from utils.olx_par import call_data_olx
 from aiogram import types, executor
 from utils.keyboards import *
 from config import dp
 import time
-
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
