@@ -8,3 +8,4 @@ docs
 venv
 .vscode
 __pycache__
+main.py

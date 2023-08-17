@@ -1,5 +1,5 @@
 from asyncpg.exceptions import UndefinedTableError
-from db.schemas.reg_model import User_model
+from db.schemas.dbb import User_model
 from asyncpg import UniqueViolationError
 from commands.check import check_max_min
 from config import POSTGRES_URI
