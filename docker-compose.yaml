@@ -11,7 +11,7 @@ services:
       - "5432:5432"
   bot:
     build: .
-    command: sh -c "python3 -m FYR_bot"
+    command: sh -c "make migrate && python3 -m FYR_bot"
     env_file:
       - ./.env
     restart: always
