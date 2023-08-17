@@ -1,10 +1,13 @@
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram import Bot, Dispatcher, types
+import platform
 import environ
 import os
 
 env = environ.Env()
 env.read_env('.env')
+
+osp = platform.platform()
 
 fake_user = ['Mozilla/5.0 (Macintosh; U; PPC Mac OS X; nl-nl) AppleWebKit/417.9 (KHTML, '
              'like Gecko) Safari/417.8',
@@ -56,3 +59,16 @@ POSTGRES_URI = f'postgresql://{user}:{password}@{host}/{db}'
 
 bot = Bot(token=env('TOKEN'), parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())
+
+help_win = [
+    r'bot\media\screen\presentation.png',
+    r'bot\media\screen\registration.png',
+    r'bot\media\screen\af_registration.png',
+    r'bot\media\screen\params.png',
+    ]
+help_lin = [
+    r'bot/media/screen/presentation.png',
+    r'bot/media/screen/registration.png',
+    r'bot/media/screen/af_registration.png',
+    r'bot/media/screen/params.png',
+    ]

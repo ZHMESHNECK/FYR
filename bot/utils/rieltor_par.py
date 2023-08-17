@@ -52,7 +52,7 @@ async def call_data_rieltor(message: types.Message, user_param):
 
         if len(mdiv) == 0 or soup.find("div", class_='sort-wrap catalog-sort-wrap catalog-sort-wrap-pc').find('span').get_text().strip() == 'За вашим запитом пропозицій не знайдено':
             await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
-            sps = []
+            return
         else:
             sps = mdiv
 

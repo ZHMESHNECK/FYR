@@ -50,7 +50,7 @@ async def call_data_country(message: types.Message, user_param):
 
         if len(mdiv) == 0 or soup.find(string='К сожалению, по вашему запросу ничего не найдено.') is not None:
             await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
-            sps = []
+            return
         else:
             sps = mdiv
 

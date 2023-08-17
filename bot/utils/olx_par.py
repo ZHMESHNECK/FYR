@@ -1,6 +1,6 @@
 from selenium.webdriver.firefox.options import Options
 from aiogram.utils.markdown import hbold, hlink
-from config import city, sort, fake_user
+from config import city, sort, fake_user, osp
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from aiogram import types
@@ -13,10 +13,15 @@ async def call_data_olx(message: types.Message, user_param):
         options = Options()
         options.set_preference("general.useragent.override",
                             f'{choice(fake_user)}')
-        options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
         options.add_argument('--headless')
 
-        driver = webdriver.Firefox(options=options)
+        
+        if "Windows" in osp:
+            options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
+            driver = webdriver.Firefox(options=options)
+        elif "Linux" in osp:
+            options.binary_location = r'/usr/bin/firefox'
+            driver = webdriver.Firefox(executable_path=r'/usr/local/bin/geckodriver', options=options)
 
         room = ['odnokomnatnye', 'dvuhkomnatnye', 'trehkomnatnye']
         parametrs = {
@@ -38,22 +43,21 @@ async def call_data_olx(message: types.Message, user_param):
         # Читаем страницу olx
         driver.get(url=url)
 
+        soup = BeautifulSoup(driver.page_source, 'lxml')
+        mdiv = soup.find_all('div', class_='css-1sw7q4x')
     except Exception:
         print(traceback.format_exc())
+        await message.answer('Не удалось соединиться с OLX')
+        return
 
     finally:
-
-        soup = BeautifulSoup(driver.page_source, 'lxml')
-
         # поиск всех объявлений
-        mdiv = soup.find_all('div', class_='css-1sw7q4x')
         driver.close()
         driver.quit()
-        await message.answer('Не удалось соединиться с OLX')
 
     if len(mdiv) == 0 or soup.find(string='Ми знайшли  0 оголошень') is not None:
         await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
-        sps = []
+        return
     else:
         sps = mdiv
 

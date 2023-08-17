@@ -4,11 +4,11 @@ from utils.country_par import call_data_country
 from commands.reg_commands import update_time
 from aiogram.dispatcher.filters import Text
 from db.temporary_storage import temp_reg
+from config import dp, help_lin, help_win, osp
 from datetime import datetime, timedelta
 from utils.olx_par import call_data_olx
 from aiogram import types, executor
 from utils.keyboards import *
-from config import dp
 import time
 
 @dp.message_handler(commands='start')
@@ -18,13 +18,13 @@ async def start(message: types.Message):
 
 @dp.message_handler(commands='help')
 async def help(message: types.Message):
-    await message.answer_photo(open(r'media\screen\presentation.png', 'rb'), caption='Приветсвую, я твой помошник с поиском аренды жилья,\nя ищу объявления на rieltor.ua | olx.ua | country.ua\nдавай я расскажу тебе что я умею')
+    await message.answer_photo(open(help_win[0] if "Windows" in osp else help_lin[0], 'rb'), caption='Приветсвую, я твой помошник с поиском аренды жилья,\nя ищу объявления на rieltor.ua | olx.ua | country.ua\nдавай я расскажу тебе что я умею')
     time.sleep(1)
-    await message.answer_photo(open(r'media\screen\registration.png', 'rb'), caption='Для начала тебе нужно пройти регистрацию, я тебе сам её предложу в самом начале.\nИспользуй подсказки на клавиатуре\nТакже большинство параметров можно не указывать, для этого, снизу клавиатуры есть кнопка "Пропуск"')
+    await message.answer_photo(open(help_win[1] if "Windows" in osp else help_lin[1], 'rb'), caption='Для начала тебе нужно пройти регистрацию, я тебе сам её предложу в самом начале.\nИспользуй подсказки на клавиатуре\nТакже большинство параметров можно не указывать, для этого, снизу клавиатуры есть кнопка "Пропуск"')
     time.sleep(1)
-    await message.answer_photo(open(r'media\screen\af_registration.png', 'rb'), caption='После регистрации вам будет доступно 2 кнопки: кнопка "искать" - сразу начнёт поиск з заданныим параметрами')
+    await message.answer_photo(open(help_win[2] if "Windows" in osp else help_lin[2], 'rb'), caption='После регистрации вам будет доступно 2 кнопки: кнопка "искать" - сразу начнёт поиск з заданныим параметрами')
     time.sleep(1)
-    await message.answer_photo(open(r'media\screen\params.png', 'rb'), caption='При нажатии кнопки "параметры" вы увидите ваши сохраненные настройки,\nа также вы сможете изменить их нажав на "Изменить параметр" и следуя инструкциям')
+    await message.answer_photo(open(help_win[3] if "Windows" in osp else help_lin[3], 'rb'), caption='При нажатии кнопки "параметры" вы увидите ваши сохраненные настройки,\nа также вы сможете изменить их нажав на "Изменить параметр" и следуя инструкциям')
 
 
 @dp.message_handler(Text(equals='🛠 параметры 🛠'))
