@@ -90,6 +90,5 @@ async def call_data_country(message: types.Message, user_param):
                 f'{hbold("Цена: ")}{item.get("Цена")}\n'
 
             await message.answer(card)
-        time.sleep(2)
     except:
         await message.answer('Не удалось соединиться с country.ua', traceback.format_exc())

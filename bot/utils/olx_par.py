@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from aiogram import types
 from random import choice
 import traceback
+import time
 
 
 async def call_data_olx(message: types.Message, user_param):
@@ -106,5 +107,6 @@ async def call_data_olx(message: types.Message, user_param):
                     f'{hbold("Район: ")}{item.get("Район")}'
 
                 await message.answer(card)
+        time.sleep(2)
     except:
         await message.answer('Не удалось соединиться с OLX', traceback.format_exc())
