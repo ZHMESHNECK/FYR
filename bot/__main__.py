@@ -11,13 +11,28 @@ from aiogram import types, executor
 from utils.keyboards import *
 import time
 
+
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
+    """
+    Отправляет юзеру стартовое приветствие
+    команда - '/start'
+
+    Args:
+        message (types.Message): сообщение пользователя
+    """
     await message.answer('Приветствую!\nначать поиск?', reply_markup=keyboard)
 
 
 @dp.message_handler(commands='help')
 async def help(message: types.Message):
+    """    
+    Отправляет юзеру картинки с текстом и примерами как пользоваться ботом
+    команда - '/help'
+
+    Args:
+        message (types.Message): сообщение пользователя
+    """
     await message.answer_photo(open(help_win[0] if "Windows" in osp else help_lin[0], 'rb'), caption='Приветсвую, я твой помошник с поиском аренды жилья,\nя ищу объявления на rieltor.ua | olx.ua | country.ua\nдавай я расскажу тебе что я умею')
     time.sleep(1)
     await message.answer_photo(open(help_win[1] if "Windows" in osp else help_lin[1], 'rb'), caption='Для начала тебе нужно пройти регистрацию, я тебе сам её предложу в самом начале.\nИспользуй подсказки на клавиатуре\nТакже большинство параметров можно не указывать, для этого, снизу клавиатуры есть кнопка "Пропуск"')
@@ -29,6 +44,13 @@ async def help(message: types.Message):
 
 @dp.message_handler(Text(equals='🛠 параметры 🛠'))
 async def settings(message: types.Message):
+    """    
+    Отправляет юзеру его сохраненные параметры если он зарегистрирован,
+    если данных нет - предлагает пройти регистрацию
+    команда - '🛠 параметры 🛠'
+    Args:
+        message (types.Message): сообщение пользователя
+    """
     user = await check_register(message)
     if user:
         await show_parametrs(message, user[0])
@@ -36,7 +58,15 @@ async def settings(message: types.Message):
 
 @dp.message_handler(Text(equals='🔎 Искать 🔍'))
 async def search(message: types.Message):
+    """
+    Проверяет имеет ли юзер сохраненные данные, 
+    есть ли блокировка на 1 минуту,
+    если всё проходит проверку запускает функции на парсинг
+    команда - '🔎 Искать 🔍'
 
+    Args:
+        message (types.Message): сообщение пользователя
+    """
     # Достаём параметры из БД
     user_param = await check_register(message)
 
@@ -66,6 +96,13 @@ async def search(message: types.Message):
 
 @dp.message_handler(Text(equals='Изменить параметр'))
 async def change_parametrs(message: types.Message):
+    """
+    отпрвляет сообщение юзеру и добавляет параметр, который юзер выберет, в State
+    команда - 'Изменить параметр'
+
+    Args:
+        message (types.Message): сообщение пользователя
+    """
     await message.answer('Выбирите что меняем:', reply_markup=change_board)
     await temp_reg.choice_param.set()
 

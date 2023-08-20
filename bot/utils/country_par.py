@@ -5,10 +5,18 @@ from random import choice
 from aiogram import types
 import traceback
 import requests
-import time
 
 
 async def call_data_country(message: types.Message, user_param):
+    """
+    функция генерирует ссылку с параметрами пользователя
+    парсит сайт country.ua
+    отправляет найденные объявления на сайте (max - 8 объявлений) в сообщения юзеру
+
+    Args:
+        message (types.Message): сообщзение пользователя
+        user_param (_type_): параметры юзера с БД
+    """
 
     ua = choice(fake_user)
 

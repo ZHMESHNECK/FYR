@@ -9,6 +9,17 @@ import traceback
 
 
 async def check_register(message: types.Message):
+    """
+    Проверяет есть ли данные юзера в БД,
+    если нет начинает регистрацию.
+    Далее проверяет наличие блокировки по временни
+
+    Args:
+        message (types.Message): сообщение пользлователя
+
+    Returns:
+        user.model: Возвращает модель юзера
+    """
     try:
         user = await select_user(message.from_user.id)
         if not user:
@@ -24,11 +35,25 @@ async def check_register(message: types.Message):
 
 
 async def start_reg(message: types.Message):
+    """
+    Начинает регистрацию для юзера
+    Устанавливает первый параметр в State
+
+    Args:
+        message (types.Message): сообщение пользователя
+    """
     await message.answer('Для начала введите город в котором искать', reply_markup=city_key)
     await registration.city.set()
 
 
 async def show_parametrs(message: types.Message, user):
+    """
+    Отправляет юзеру все его сохраненные параметры
+
+    Args:
+        message (types.Message): сообщение пользователя
+        user (_type_): модель пользователя
+    """
     await message.answer(f'🛠 Параметры 🛠:\n'
                          f'\n<b>Город</b> - {user.city if user.city is not None else "Не указано"}\n'
                          f'\n<b>Мин. цена</b> - {str(user.min_price) + " грн" if user.min_price is not None else "Не указано"}\n'
@@ -41,6 +66,14 @@ async def show_parametrs(message: types.Message, user):
 
 @dp.message_handler(state=temp_reg.choice_param)
 async def single_change(message: types.Message, state: FSMContext):
+    """
+    Функция меняет 1 параметр который выбрал уже зарегистрированный юзер,
+    если юзер не отменил изменение то сохраняем параметр который меняем в State и запускаем single_change2
+
+    Args:
+        message (types.Message): сообщение пользователя
+        state (FSMContext): управление временным хранилищем
+    """
     user = await select_user(message.from_user.id)
     data = {'Город': 'city', 'Кол. комнат': 'count_rooms',
             'Мин. цена': 'min_price', 'Макс. цена': 'max_price', 'Мин. этаж': 'min_floor', 'Макс. этаж': 'max_floor', 'Сортировка': 'sort'}
@@ -65,6 +98,13 @@ async def single_change(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=temp_reg.param)
 async def single_change_2(message: types.Message, state: FSMContext):
+    """
+    Функция достаёт из State параметр который меняем и принимает от юзера на что меняем
+
+    Args:
+        message (types.Message): сообщение от пользователя
+        state (FSMContext): управление временным хранилищем
+    """
     await state.update_data(param=message.text)
     data = await state.get_data()
     try:
@@ -149,6 +189,13 @@ async def single_change_2(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.city)
 async def get_city(message: types.Message, state: FSMContext):
+    """
+    функция регистрации (город)
+
+    Args:
+        message (types.Message): сообщение от пользователя
+        state (FSMContext): управление временным хранилищем
+    """
 
     if check_city(message.text):
         await state.update_data(city=message.text)
@@ -160,6 +207,13 @@ async def get_city(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.min_price)
 async def get_min_price(message: types.Message, state: FSMContext):
+    """
+    функция регистрации (минимальной цены)
+
+    Args:
+        message (types.Message): сообщение от пользователя
+        state (FSMContext): управление временным хранилищем
+    """
 
     try:
         if message.text == 'Пропуск':
@@ -183,6 +237,13 @@ async def get_min_price(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.max_price)
 async def get_max_price(message: types.Message, state: FSMContext):
+    """
+    функция регистрации (максимальной цены)
+
+    Args:
+        message (types.Message): сообщение от пользователя
+        state (FSMContext): управление временным хранилищем
+    """
 
     try:
         if message.text == 'Пропуск':
@@ -210,6 +271,13 @@ async def get_max_price(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.count_rooms)
 async def get_count_rooms(message: types.Message, state: FSMContext):
+    """
+    функция регистрации (количества комнат)
+
+    Args:
+        message (types.Message): сообщение от пользователя
+        state (FSMContext): управление временным хранилищем
+    """
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, количество комнат не важно.\nУкажите <b>с</b> какого этажа искать квартиру воспользовавшись клавиатурой или введя вручную', reply_markup=floor_n_key)
@@ -228,6 +296,13 @@ async def get_count_rooms(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.min_floor)
 async def get_min_floor(message: types.Message, state: FSMContext):
+    """
+    функция регистрации (минимального этажа)
+
+    Args:
+        message (types.Message): сообщение от пользователя
+        state (FSMContext): управление временным хранилищем
+    """
 
     try:
         if message.text == 'Пропуск':
@@ -244,7 +319,13 @@ async def get_min_floor(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.max_floor)
 async def get_max_floor(message: types.Message, state: FSMContext):
+    """
+    функция регистрации (максимального этажа)
 
+    Args:
+        message (types.Message): сообщение от пользователя
+        state (FSMContext): управление временным хранилищем
+    """
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, <b>до</b> какого этажа искать не важно.\nУкажите сортировку объявлений', reply_markup=sort_key)
@@ -264,7 +345,13 @@ async def get_max_floor(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=registration.sort)
 async def get_sort(message: types.Message, state: FSMContext):
+    """
+    функция регистрации (сортировки)
 
+    Args:
+        message (types.Message): сообщение от пользователя
+        state (FSMContext): управление временным хранилищем
+    """
     try:
         if message.text == 'Пропуск':
             await message.answer('Окей, сортировка будет по стандарту', reply_markup=keyboard)

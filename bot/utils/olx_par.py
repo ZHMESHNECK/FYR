@@ -10,19 +10,34 @@ import time
 
 
 async def call_data_olx(message: types.Message, user_param):
+    """
+    функция генерирует ссылку с параметрами пользователя
+    открывает firefox
+    парсит olx
+    закрывает firefox
+    отправляет найденные объявления на сайте (max - 8 объявлений) в сообщения юзеру
+    после отправки -  time.sleep(2)
+
+    Args:
+        message (types.Message): сообщзение пользователя
+        user_param (_type_): параметры юзера с БД
+    """
     try:
         options = Options()
         options.set_preference("general.useragent.override",
-                            f'{choice(fake_user)}')
+                               f'{choice(fake_user)}')
         options.add_argument('--headless')
 
-        
         if "Windows" in osp:
+            # путь к расположению браузера ( там же у меня и расположен geckodriver )
             options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
             driver = webdriver.Firefox(options=options)
         elif "Linux" in osp:
+            # путь к расположению браузера
             options.binary_location = r'/usr/bin/firefox'
-            driver = webdriver.Firefox(executable_path=r'/usr/local/bin/geckodriver', options=options)
+            # пусть к расположению geckodriver
+            driver = webdriver.Firefox(
+                executable_path=r'/usr/local/bin/geckodriver', options=options)
 
         room = ['odnokomnatnye', 'dvuhkomnatnye', 'trehkomnatnye']
         parametrs = {
@@ -44,15 +59,15 @@ async def call_data_olx(message: types.Message, user_param):
         # Читаем страницу olx
         driver.get(url=url)
 
+        # поиск всех объявлений
         soup = BeautifulSoup(driver.page_source, 'lxml')
         mdiv = soup.find_all('div', class_='css-1sw7q4x')
     except Exception:
-        print(traceback.format_exc())
-        await message.answer('Не удалось соединиться с OLX')
+        await message.answer('Не удалось соединиться с OLX', print(traceback.format_exc()))
         return
 
     finally:
-        # поиск всех объявлений
+        # закрывает драйвер и браузер
         driver.close()
         driver.quit()
 

@@ -8,6 +8,16 @@ import time
 
 
 async def call_data_rieltor(message: types.Message, user_param):
+    """
+    функция генерирует ссылку с параметрами пользователя
+    парсит сайт rieltor.ua
+    отправляет найденные объявления на сайте (max - 8 объявлений) в сообщения юзеру
+    после отправки - time.sleep(2)
+
+    Args:
+        message (types.Message): сообщзение пользователя
+        user_param (_type_): параметры юзера с БД
+    """
 
     ua = choice(fake_user)
 

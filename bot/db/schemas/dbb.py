@@ -7,6 +7,10 @@ db = Gino()
 
 
 class BaseModel(db.Model):
+    """
+    Двигатель Gino для связи с БД
+
+    """
     __abstract__ = True
 
     def __str__(self):
@@ -23,6 +27,10 @@ class BaseModel(db.Model):
 
 
 class User_model(BaseModel):
+    """
+    Таблица которая создаётся при установки связи с БД (если её нет)
+
+    """    
     __tablename__ = 'users'
     user_id = Column(BigInteger, primary_key=True, nullable=False)
     city = Column(String(25), nullable=True)
