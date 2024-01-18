@@ -6,7 +6,12 @@ from bs4 import BeautifulSoup
 from aiogram import types
 from random import choice
 import traceback
+import environ
 import time
+
+
+env = environ.Env()
+env.read_env('.env')
 
 
 async def call_data_olx(message: types.Message, user_param):
@@ -22,6 +27,8 @@ async def call_data_olx(message: types.Message, user_param):
         message (types.Message): сообщзение пользователя
         user_param (_type_): параметры юзера с БД
     """
+
+    check_driver = False # Нужно для избежании ошибки при отсутвии драйвера
     try:
         options = Options()
         options.set_preference("general.useragent.override",
@@ -30,15 +37,16 @@ async def call_data_olx(message: types.Message, user_param):
 
         if "Windows" in osp:
             # путь к расположению браузера ( там же у меня и расположен geckodriver )
-            options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
+            options.binary_location = env('WINDOWS')
             driver = webdriver.Firefox(options=options)
         elif "Linux" in osp:
             # путь к расположению браузера
-            options.binary_location = r'/usr/bin/firefox'
+            options.binary_location = env('LINUX')
             # пусть к расположению geckodriver
             driver = webdriver.Firefox(
-                executable_path=r'/usr/local/bin/geckodriver', options=options)
-
+                executable_path=env('LINUX_DRIVER'), options=options)
+            
+        check_driver = True
         room = ['odnokomnatnye', 'dvuhkomnatnye', 'trehkomnatnye']
         parametrs = {
             'rooms': "&".join([f'search[filter_enum_number_of_rooms_string][{num}]={room[int(rom)-1]}' for num, rom in enumerate(list(map(int, user_param.count_rooms.replace('-', ''))))]) if user_param.count_rooms is not None else "",
@@ -63,13 +71,14 @@ async def call_data_olx(message: types.Message, user_param):
         soup = BeautifulSoup(driver.page_source, 'lxml')
         mdiv = soup.find_all('div', class_='css-1sw7q4x')
     except Exception:
-        await message.answer('Не удалось соединиться с OLX', print(traceback.format_exc()))
+        await message.answer('Не удалось соединиться с OLX')
         return
 
     finally:
-        # закрывает драйвер и браузер
-        driver.close()
-        driver.quit()
+        if check_driver:
+            # закрывает драйвер и браузер
+            driver.close()
+            driver.quit()
 
     if len(mdiv) == 0 or soup.find(string='Ми знайшли  0 оголошень') is not None:
         await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')

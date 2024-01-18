@@ -45,7 +45,8 @@
 <a name="Требования"></a>
 
 ## Требования
-- Python 3.9 и выше
+- Python 3.9
+- SQLAlchemy==1.3.24 \ gino==1.0.1 !!
 - PostgreSQL 14+
 - firefoxм 114+ ( для парсинга olx ), а также geckodriver v0.33.0
 
@@ -84,6 +85,9 @@ POSTGRES_PORT=5432
 POSTGRES_DB=NAME_TABLE
 POSTGRES_USER=USER_NAME
 POSTGRES_PASSWORD=PASSWORD
+WINDOWS=Path:\to\browser
+LINUX=Path/to/browser
+LINUX_DRIVER=Path/to/geckodriver
 ```
 6. Заходим в `utils/olx_par.py` на 20 строчку и указываем свой путь к firefox
 7. Переходим в файл `__main__.py` и запускаем 
@@ -116,6 +120,11 @@ POSTGRES_PASSWORD=PASSWORD
 ## Обновления
 
 ПР - переходное обновление ( Используется для синхронизации проекта WIN\LINUX )
+
+version 1.8.4
+- Исправлена ошибка при не верном пути к драйверу браузера для olx
+- Версия python в Docker заменена на alpine для облегчения контейнера
+- Пути к браузерам перенесены в .env
 
 version 1.8.3
 - Добавлены dockstring в функции
