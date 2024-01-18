@@ -27,8 +27,6 @@ async def call_data_olx(message: types.Message, user_param):
         message (types.Message): сообщзение пользователя
         user_param (_type_): параметры юзера с БД
     """
-
-    check_driver = False # Нужно для избежании ошибки при отсутвии драйвера
     try:
         options = Options()
         options.set_preference("general.useragent.override",
@@ -43,10 +41,8 @@ async def call_data_olx(message: types.Message, user_param):
             # путь к расположению браузера
             options.binary_location = env('LINUX')
             # пусть к расположению geckodriver
-            driver = webdriver.Firefox(
-                executable_path=env('LINUX_DRIVER'), options=options)
+            driver = webdriver.Firefox(executable_path=env('LINUX_DRIVER'), options=options)
             
-        check_driver = True
         room = ['odnokomnatnye', 'dvuhkomnatnye', 'trehkomnatnye']
         parametrs = {
             'rooms': "&".join([f'search[filter_enum_number_of_rooms_string][{num}]={room[int(rom)-1]}' for num, rom in enumerate(list(map(int, user_param.count_rooms.replace('-', ''))))]) if user_param.count_rooms is not None else "",
@@ -75,8 +71,7 @@ async def call_data_olx(message: types.Message, user_param):
         return
 
     finally:
-        if check_driver:
-            # закрывает драйвер и браузер
+        if 'driver' in locals():
             driver.close()
             driver.quit()
 
