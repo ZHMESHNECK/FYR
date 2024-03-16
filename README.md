@@ -1,3 +1,5 @@
+https://t.me/find_your_roof_bot
+
 # FYR
 ## навигация 
 :bulb: [Идея](#идея) :bulb:
