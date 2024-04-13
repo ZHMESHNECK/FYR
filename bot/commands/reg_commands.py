@@ -13,7 +13,7 @@ def open_db(func):
 
     Args:
         func (_type_): функция
-    """    
+    """
     async def wrapper(*args, **kwargs):
         try:
             async with db.with_bind(POSTGRES_URI):
@@ -25,8 +25,9 @@ def open_db(func):
                 return await func(*args)
     return wrapper
 
+
 @open_db
-async def add_user(user_id: int, city: str or None, min_price: int or None, max_price: int or None, count_rooms: str or None, min_floor: int or None, max_floor: int or None, sort: str or None):
+async def add_user(user_id: int, city: str = None, min_price: int = None, max_price: int = None, count_rooms: str = None, min_floor: int = None, max_floor: int = None, sort: str = None):
     """
     Добавляет модель юзера в БД
 
@@ -42,7 +43,7 @@ async def add_user(user_id: int, city: str or None, min_price: int or None, max_
 
     Returns:
         _type_: True if успешно добавлено
-    """    
+    """
     try:
         user = User_model(user_id=user_id, city=city, min_price=min_price, max_price=max_price,
                           count_rooms=count_rooms, min_floor=min_floor, max_floor=max_floor, sort=sort)
@@ -59,6 +60,7 @@ async def select_user(user_id):
     """
     return await User_model.query.where(User_model.user_id == user_id).gino.first()
 
+
 # city
 @open_db
 async def update_user_c(user_id, param):
@@ -67,9 +69,10 @@ async def update_user_c(user_id, param):
     Args:
         user_id (_type_): user_id
         param (_type_): параметр который устанавливаем
-    """    
+    """
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
     await user.update(city=param).apply()
+
 
 # min_price
 @open_db
@@ -83,12 +86,13 @@ async def update_user_n_p(user_id, param):
 
     Returns:
         _type_: если проверка на валидность данных пройдена True else False
-    """    
+    """
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
     if check_max_min(user.max_price, param):
         await user.update(min_price=param).apply()
         return True
     return False
+
 
 # max_price
 @open_db
@@ -102,25 +106,27 @@ async def update_user_x_p(user_id, param):
 
     Returns:
         _type_: если проверка на валидность данных пройдена True else False
-    """  
+    """
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
     if check_max_min(param, user.min_price):
         await user.update(max_price=param).apply()
         return True
     return False
 
+
 # count_room
 @open_db
 async def update_user_c_r(user_id, param):
     """
     Обновляет параметр количество комнат в модели юзера
-    
+
     Args:
         user_id (_type_): user_id
         param (_type_): параметр который устанавливаем
-    """    
+    """
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
     await user.update(count_rooms=param).apply()
+
 
 # min_floor
 @open_db
@@ -134,12 +140,13 @@ async def update_user_n_f(user_id, param):
 
     Returns:
         _type_: если проверка на валидность данных пройдена True else False
-    """    
+    """
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
     if check_max_min(user.max_floor, param):
         await user.update(min_floor=param).apply()
         return True
     return False
+
 
 # max_floor
 @open_db
@@ -153,12 +160,13 @@ async def update_user_x_f(user_id, param):
 
     Returns:
         _type_: если проверка на валидность данных пройдена True else False
-    """    
+    """
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
     if check_max_min(param, user.min_floor):
         await user.update(max_floor=param).apply()
         return True
     return False
+
 
 # sort
 @open_db
@@ -169,9 +177,10 @@ async def update_user_s(user_id, param):
     Args:
         user_id (_type_): user_id
         param (_type_): параметр который устанавливаем
-    """    
+    """
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
     await user.update(sort=param).apply()
+
 
 @open_db
 async def update_time(user_id, param):
@@ -181,6 +190,6 @@ async def update_time(user_id, param):
     Args:
         user_id (_type_): user_id
         param (_type_): параметр который устанавливаем
-    """    
+    """
     user = await User_model.query.where(User_model.user_id == user_id).gino.first()
     await user.update(time=param).apply()

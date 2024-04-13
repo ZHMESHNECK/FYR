@@ -1,16 +1,16 @@
 version: '2.17'
 services:
   db:
-    image: postgres:15-alpine
+    image: zhmeshneck/postgres:v0.1
     env_file:
       - ./.env
     volumes:
       - pgdata:/var/lib/postgresql/data
-    restart: on-failure
+    restart: always
     ports:
       - "5432:5432"
   bot:
-    build: .
+    image: zhmeshneck/fyr:v0.2
     command: sh -c "make migrate && python3.9 bot"
     env_file:
       - ./.env

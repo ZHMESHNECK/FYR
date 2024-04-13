@@ -2,12 +2,16 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram import Bot, Dispatcher, types
 import platform
 import environ
+import logging
 import os
 
 env = environ.Env()
 env.read_env('.env')
 
 osp = platform.platform()
+
+logging.basicConfig(level=logging.WARNING, filename='logs.log',
+                    filemode='w', format="%(asctime)s %(levelname)s %(message)s")
 
 fake_user = ['Mozilla/5.0 (Macintosh; U; PPC Mac OS X; nl-nl) AppleWebKit/417.9 (KHTML, '
              'like Gecko) Safari/417.8',
@@ -54,7 +58,7 @@ db = env('POSTGRES_DB')
 user = env('POSTGRES_USER')
 password = env('POSTGRES_PASSWORD')
 
-POSTGRES_URI = f'postgresql://{user}:{password}@{host}/{db}'
+POSTGRES_URI = f'postgresql://{user}:{password}@{host}:{port}/{db}'
 
 
 bot = Bot(token=env('TOKEN'), parse_mode=types.ParseMode.HTML)
@@ -65,10 +69,10 @@ help_win = [
     r'bot\media\screen\registration.png',
     r'bot\media\screen\af_registration.png',
     r'bot\media\screen\params.png',
-    ]
+]
 help_lin = [
     r'bot/media/screen/presentation.png',
     r'bot/media/screen/registration.png',
     r'bot/media/screen/af_registration.png',
     r'bot/media/screen/params.png',
-    ]
+]

@@ -1,11 +1,13 @@
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import TimeoutException
 from aiogram.utils.markdown import hbold, hlink
 from config import city, sort, fake_user, osp
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from aiogram import types
 from random import choice
-import traceback
+import asyncio
+import logging
 import environ
 import time
 
@@ -41,8 +43,9 @@ async def call_data_olx(message: types.Message, user_param):
             # путь к расположению браузера
             options.binary_location = env('LINUX')
             # пусть к расположению geckodriver
-            driver = webdriver.Firefox(executable_path=env('LINUX_DRIVER'), options=options)
-            
+            driver = webdriver.Firefox(
+                executable_path=env('LINUX_DRIVER'), options=options)
+
         room = ['odnokomnatnye', 'dvuhkomnatnye', 'trehkomnatnye']
         parametrs = {
             'rooms': "&".join([f'search[filter_enum_number_of_rooms_string][{num}]={room[int(rom)-1]}' for num, rom in enumerate(list(map(int, user_param.count_rooms.replace('-', ''))))]) if user_param.count_rooms is not None else "",
@@ -66,7 +69,9 @@ async def call_data_olx(message: types.Message, user_param):
         # поиск всех объявлений
         soup = BeautifulSoup(driver.page_source, 'lxml')
         mdiv = soup.find_all('div', class_='css-1sw7q4x')
-    except Exception:
+
+    except (Exception, TimeoutException):
+        logging.error('call_data_olx - driver', exc_info=True)
         await message.answer('Не удалось соединиться с OLX')
         return
 
@@ -75,7 +80,7 @@ async def call_data_olx(message: types.Message, user_param):
             driver.close()
             driver.quit()
 
-    if len(mdiv) == 0 or soup.find(string='Ми знайшли  0 оголошень') is not None:
+    if len(mdiv) == 0 or soup.find(string='Ми знайшли 0 оголошень') is not None:
         await message.answer('За заданными критериями ничего не найдено 😅\nпопробуйте изменить параметры')
         return
     else:
@@ -86,7 +91,7 @@ async def call_data_olx(message: types.Message, user_param):
             # если это рекламное объявление, то пропускаем его
             if not div.find('div', class_='css-1jh69qu'):
                 try:
-                    price = div.find('p', class_='css-10b0gli er34gjf0').text
+                    price = div.find('p', {'data-testid': 'ad-price'}).text
                 except:
                     price = 'No price'
                 try:
@@ -100,7 +105,7 @@ async def call_data_olx(message: types.Message, user_param):
                     link = 'No url'
                 try:
                     area = div.find(
-                        'p', class_='css-veheph er34gjf0').text.split('-')
+                        'p', {'data-testid': 'location-date'}).text.split('-')
                 except:
                     area = 'No area'
 
@@ -128,4 +133,5 @@ async def call_data_olx(message: types.Message, user_param):
                 await message.answer(card)
         time.sleep(2)
     except:
-        await message.answer('Не удалось соединиться с OLX', traceback.format_exc())
+        logging.error('call_data_olx', exc_info=True)
+        await message.answer('Не удалось соединиться с OLX')
